@@ -1,4 +1,4 @@
-# ohwyy_proj_template
+# RiptideRemix
 
 Template for starting Oceanhackweek project repos. 
 
