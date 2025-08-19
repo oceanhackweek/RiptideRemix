@@ -1,0 +1,12 @@
+[workspace]
+authors = ["KaseyMCastello <kcastello@ucsd.edu>"]
+channels = ["conda-forge"]
+name = "ohw25_proj_RiptideRemix"
+platforms = ["linux-64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+jupyterlab = ">=4.4.6,<5"
+pixi-kernel = ">=0.6.6,<0.7"
