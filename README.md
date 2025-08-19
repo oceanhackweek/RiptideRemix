@@ -1,7 +1,7 @@
-# <img src="https://github.com/KaseyMCastello/RiptideRemix/blob/main/Images/logo.png" alt="Logo" width="50" height="50"> RiptideRemix  
-This repository hosts the source code for an OceanHackWeek2025 project to allow for udio classificaiton and audio-synthesis of acoustic soundsources. 
+## RiptideRemix # <img src="https://github.com/KaseyMCastello/RiptideRemix/blob/main/Images/logo.png" alt="Logo" width="50" height="50"> RiptideRemix  
+This repository hosts the source code for an OceanHackWeek2025 project to allow for audio classificaiton and audio-synthesis of acoustic soundsources. 
 
-**Folder Structure**
+## Folder Structure**
 
 * `contributor_folders` (optional) Each contributor can make a folder here and 
 push their work here during the week. This will allow everyone to see each others work but prevent any merge conflicts. It is good if participants are new to collaborative coding.
@@ -14,10 +14,6 @@ preserve relative paths, but the dataset does not need to be added to git/GitHub
 
 You can start with a simple structure and as you progress you can refine it to contain more components. [Here](https://cookiecutter-data-science.drivendata.org/#directory-structure) is an example of a more elaborate structure for a data science project.
 
-## RiptideRemix
-
-## One-line Description
-
 ## Planning
 
 ## Collaborators
@@ -28,6 +24,8 @@ You can start with a simple structure and as you progress you can refine it to c
 | Mattie Toll           | Participant         |
 | Oluwatofunmi Adeboye  | Participant         |
 | Isabelle Brandicourt  | Participant         |
+| Derya Gumustel        | Fellow              |
+| Dwight Owens          | Mentor              |
 
 ## Planning
 
