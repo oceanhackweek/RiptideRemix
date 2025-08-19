@@ -1,7 +1,4 @@
-# RiptideRemix
-
-!![RiptideRemixLogo](RiptideRemix/Images/logo.png)
-
+# <img src="https://github.com/KaseyMCastello/RiptideRemix/blob/main/Images/logo.png" alt="Logo" width="50" height="50"> RiptideRemix  
 This repository hosts the source code for an OceanHackWeek2025 project to allow for udio classificaiton and audio-synthesis of acoustic soundsources. 
 
 **Folder Structure**
