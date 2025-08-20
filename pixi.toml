@@ -29,3 +29,6 @@ ipywidgets = ">=8.1.7,<9"
 ffmpeg = ">=7.1.1,<8"
 ffmpeg-python = ">=0.2.0,<0.3"
 paramiko = ">=4.0.0,<5"
+bokeh = ">=3.7.3,<4"
+holoviews = ">=1.21.0,<2"
+
