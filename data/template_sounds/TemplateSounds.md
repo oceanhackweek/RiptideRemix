@@ -3,9 +3,11 @@
 
 # Whale Sounds
 
-* Orca:
+ Orca:
+        ** (February 1, 2012) A rare recording of Inner Coast Biggs orcas hunting prey. The loud cracks are either breaching or cav>
 * Sperm
-* Humpback: 
+* Humpback:
+        ** (August 1, 2012) A Humpback whale's non-song signals were recorded by on Ocean Sonics icListen high frequency hydrophone>
 
 
 # Seismic Events
