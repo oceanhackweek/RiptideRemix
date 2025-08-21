@@ -20,11 +20,12 @@ def _():
         basePath = Path("/home/jovyan/ohw25_proj_RiptideRemix")
     return (basePath,)
 
+
 @app.cell
 def _(basePath):
     import marimo as mo
     mo.image(
-        src="/home/jovyan/ohw25_proj_RiptideRemix/Images/logo_flat.jpg",
+        src= basePath / "Images" / "logo_flat.jpg",
         alt="placeholder",
         width=1200,
         height=100,
@@ -53,9 +54,9 @@ def _(mo):
 
 
 @app.cell
-def _(mo):
+def _(basePath, mo):
     mo.image(
-        src="/home/jovyan/ohw25_proj_RiptideRemix/Images/ArtGifs/placeholder.gif",
+        src= basePath / "Images" /  "ArtGifs" / "placeholder.gif",
         alt="placeholder",
         width=1200,
         height=200,
@@ -90,9 +91,9 @@ def _(mo):
 
 
 @app.cell
-def _(mo):
+def _(basePath, mo):
     mo.image(
-        src="/home/jovyan/ohw25_proj_RiptideRemix/Images/squirrel.JPG",
+        src= basePath / "Images" / "squirrel.JPG",
         alt="placeholder",
         width=200,
         height=200,
@@ -103,9 +104,9 @@ def _(mo):
 
 
 @app.cell
-def _(mo):
+def _(basePath, mo):
     file_browser = mo.ui.file_browser(
-        initial_path="/home/jovyan/ohw25_proj_RiptideRemix/data", multiple=True)
+        initial_path= basePath / "data", multiple=True)
     return
 
 
@@ -248,7 +249,7 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    soundclass_dropdown = mo.ui.dropdown(options={'Seismic Event': 1, 'Cetacean Call': 2}, value='Seismic Event')
+    soundclass_dropdown = mo.ui.dropdown(options={'Seismic Event': 1, 'Cetacean Call': 2, 'Anthropogenic': 3, 'Other': 4})
     return (soundclass_dropdown,)
 
 
@@ -566,9 +567,9 @@ def _(plt):
 
 
 @app.cell(column=5)
-def _(mo):
+def _(basePath, mo):
     mo.image(
-        src="/home/jovyan/ohw25_proj_RiptideRemix/Images/logo.png",
+        src=  basePath / "Images" / "logo.png",
         alt="Logo",
         width=100,
         height=100,
