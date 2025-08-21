@@ -20,18 +20,11 @@ def _():
         basePath = Path("/home/jovyan/ohw25_proj_RiptideRemix")
     return (basePath,)
 
-
-@app.cell
-def _():
-    return
-
-
 @app.cell
 def _(basePath):
     import marimo as mo
-
     mo.image(
-        src = basePath / "Images" / "logo_flat.jpg",
+        src="/home/jovyan/ohw25_proj_RiptideRemix/Images/logo_flat.jpg",
         alt="placeholder",
         width=1200,
         height=100,
@@ -60,9 +53,9 @@ def _(mo):
 
 
 @app.cell
-def _(basePath, mo):
+def _(mo):
     mo.image(
-        src = basePath / "Images" / "ArtGifs" / "placeholder.gif",
+        src="/home/jovyan/ohw25_proj_RiptideRemix/Images/ArtGifs/placeholder.gif",
         alt="placeholder",
         width=1200,
         height=200,
@@ -97,9 +90,9 @@ def _(mo):
 
 
 @app.cell
-def _(basePath, mo):
+def _(mo):
     mo.image(
-        src = basePath / "Images" / "squirrel.JPG",
+        src="/home/jovyan/ohw25_proj_RiptideRemix/Images/squirrel.JPG",
         alt="placeholder",
         width=200,
         height=200,
@@ -110,10 +103,9 @@ def _(basePath, mo):
 
 
 @app.cell
-def _(basePath, mo):
-
-
-    file_browser = mo.ui.file_browser( initial_path= basePath / "data", multiple=True)
+def _(mo):
+    file_browser = mo.ui.file_browser(
+        initial_path="/home/jovyan/ohw25_proj_RiptideRemix/data", multiple=True)
     return
 
 
@@ -238,7 +230,7 @@ def _(mo):
 
 @app.cell(column=2)
 def _(mo):
-    mo.md(r"""# LIBRARY""")
+    mo.md(r"""## LIBRARY""")
     return
 
 
@@ -380,7 +372,7 @@ def _(mo):
 
 @app.cell(column=3)
 def _(mo):
-    mo.md(r"""# Clip Editor""")
+    mo.md(r"""## Clip Editor""")
     return
 
 
@@ -454,7 +446,7 @@ def _(mo):
 
 @app.cell(column=4)
 def _(mo):
-    mo.md(r"""# MIXER""")
+    mo.md(r"""## MIXER""")
     return
 
 
@@ -574,9 +566,9 @@ def _(plt):
 
 
 @app.cell(column=5)
-def _(basePath, mo):
+def _(mo):
     mo.image(
-        src = basePath / "Images" / "logo.png",
+        src="/home/jovyan/ohw25_proj_RiptideRemix/Images/logo.png",
         alt="Logo",
         width=100,
         height=100,
