@@ -8,7 +8,7 @@ app = marimo.App()
 def _(mo):
     mo.md(
         r"""
-    # Welcome to Riptide Remix
+    # Riptide Remix
 
     The goal of this project is to create a web interface where users can combine marine soundscape audio clips (e.g. whale calls, earthquakes, ships) to create music. Think GarageBand, but with marine science!
 
@@ -25,9 +25,27 @@ def _():
 
 
 @app.cell
+def _():
+    return
+
+
+@app.cell
 def _(mo):
     checkbox = mo.ui.checkbox(label="Loop audio")
     return (checkbox,)
+
+
+@app.cell
+def _(mo):
+    mo.image(
+        src="/home/jovyan/ohw25_proj_RiptideRemix/Images/ArtGifs/placeholder.gif",
+        alt="placeholder",
+        width=750,
+        height=200,
+        rounded=False,
+        caption=""
+    )
+    return
 
 
 @app.cell
