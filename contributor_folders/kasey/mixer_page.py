@@ -65,12 +65,6 @@ def _(mo):
     return
 
 
-@app.cell
-def _(mo):
-    mo.md(r"""What if users had the option to save their song when they were happy with it?""")
-    return
-
-
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""asdf""")
@@ -94,24 +88,6 @@ def _(mo):
 def _(mo):
     file_browser = mo.ui.file_browser(
         initial_path="/home/jovyan/ohw25_proj_RiptideRemix/data", multiple=True)
-    return (file_browser,)
-
-
-@app.cell
-def _(file_browser):
-    file_browser
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(r"""## -----------------------------------------SOUND MIXER -----------------------------------------------""")
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(r"""## CLIP EDITOR""")
     return
 
 
@@ -152,79 +128,6 @@ def _(np, plt, x, y):
 
 
 @app.cell
-def _(mo):
-    mo.md(r"""## NEW SONG""")
-    return
-
-
-@app.cell
-def _(plt):
-    import matplotlib.patches as patches
-
-    def plot_time_freq_boxes(boxes, 
-                             time_range=(0, 60), 
-                             freq_range=(0, 20000)):
-        """
-        Plot time-frequency boxes on a 2D plot with labels and colors.
-
-        Parameters
-        ----------
-        boxes : list of tuples
-            Each tuple = (t_start, t_end, f_start, f_end, label)
-        time_range : tuple
-            (min_time, max_time) for x-axis
-        freq_range : tuple
-            (min_freq, max_freq) for y-axis
-        """
-        fig, ax = plt.subplots(figsize=(10, 6))
-        ax.set_facecolor("black")  # black background
-
-        for (t_start, t_end, f_start, f_end, label) in boxes:
-            # Pick color based on label
-            if label.lower() == "seismic":
-                facecolor = "deeppink"
-                edgecolor = "hotpink"
-            elif label.lower() == "whale":
-                facecolor = "purple"
-                edgecolor = "violet"
-            else:
-                facecolor = "gray"
-                edgecolor = "lightgray"
-
-            # Draw box
-            rect = patches.Rectangle(
-                (t_start, f_start), 
-                t_end - t_start, 
-                f_end - f_start,
-                linewidth=1.5, edgecolor=edgecolor, facecolor=facecolor, alpha=0.8
-            )
-            ax.add_patch(rect)
-
-            # Add label text at the center of the box
-            # ax.text(
-            #     (t_start + t_end) / 2, 
-            #     (f_start + f_end) / 2, 
-            #     label, 
-            #     color="white", ha="center", va="center", fontsize=9, weight="bold"
-            # )
-
-        # Set limits and labels
-        ax.set_xlim(time_range)
-        ax.set_ylim(freq_range)
-        ax.set_xlabel("Time (s)", color="Purple")
-        ax.set_ylabel("Frequency (Hz)", color="Purple")
-        ax.set_title("MY SONG", color="Purple")
-
-        # White ticks
-        ax.tick_params(colors="white")
-
-        return fig
-
-
-    return (plot_time_freq_boxes,)
-
-
-@app.cell
 def _():
     boxes = [
         (5, 10, 1000, 3000, "seismic"),
@@ -233,13 +136,6 @@ def _():
         (42, 50, 2000, 6000, "whale"),
     ]
     return (boxes,)
-
-
-@app.cell
-def _(boxes, plot_time_freq_boxes):
-    fig3 = plot_time_freq_boxes(boxes)
-    fig3
-    return
 
 
 @app.cell
@@ -572,6 +468,80 @@ def _(mo):
     return
 
 
+@app.cell
+def _(boxes, plot_time_freq_boxes):
+    fig3 = plot_time_freq_boxes(boxes)
+    fig3
+    return
+
+
+@app.cell
+def _(plt):
+    import matplotlib.patches as patches
+
+    def plot_time_freq_boxes(boxes, 
+                             time_range=(0, 60), 
+                             freq_range=(0, 20000)):
+        """
+        Plot time-frequency boxes on a 2D plot with labels and colors.
+
+        Parameters
+        ----------
+        boxes : list of tuples
+            Each tuple = (t_start, t_end, f_start, f_end, label)
+        time_range : tuple
+            (min_time, max_time) for x-axis
+        freq_range : tuple
+            (min_freq, max_freq) for y-axis
+        """
+        fig, ax = plt.subplots(figsize=(10, 6))
+        ax.set_facecolor("black")  # black background
+
+        for (t_start, t_end, f_start, f_end, label) in boxes:
+            # Pick color based on label
+            if label.lower() == "seismic":
+                facecolor = "deeppink"
+                edgecolor = "hotpink"
+            elif label.lower() == "whale":
+                facecolor = "purple"
+                edgecolor = "violet"
+            else:
+                facecolor = "gray"
+                edgecolor = "lightgray"
+
+            # Draw box
+            rect = patches.Rectangle(
+                (t_start, f_start), 
+                t_end - t_start, 
+                f_end - f_start,
+                linewidth=1.5, edgecolor=edgecolor, facecolor=facecolor, alpha=0.8
+            )
+            ax.add_patch(rect)
+
+            # Add label text at the center of the box
+            # ax.text(
+            #     (t_start + t_end) / 2, 
+            #     (f_start + f_end) / 2, 
+            #     label, 
+            #     color="white", ha="center", va="center", fontsize=9, weight="bold"
+            # )
+
+        # Set limits and labels
+        ax.set_xlim(time_range)
+        ax.set_ylim(freq_range)
+        ax.set_xlabel("Time (s)", color="Purple")
+        ax.set_ylabel("Frequency (Hz)", color="Purple")
+        ax.set_title("MY SONG", color="Purple")
+
+        # White ticks
+        ax.tick_params(colors="white")
+
+        return fig
+
+
+    return (plot_time_freq_boxes,)
+
+
 @app.cell(column=5)
 def _(mo):
     mo.image(
@@ -618,6 +588,12 @@ def _(mo):
 @app.cell
 def _(mo):
     mo.md(r"""Oluwatofunmi""")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""Dwight""")
     return
 
 
