@@ -387,15 +387,15 @@ def _(mo):
 
 
 @app.cell
-def _(slider_amp, slider_f, slider_speed, slider_t):
+def _(slider_amp, slider_pitch, slider_speed, slider_t):
     start_time = slider_t.value
-    # ptch = slider_ptch.value
-    # spd = slider_speed.value
-    ptch_speed = slider_speed.value
-    loops = slider_f.value
+    ptch = slider_pitch.value
+    spd = slider_speed.value
+    # ptch_speed = slider_speed.value
+    loops = 1 # slider_f.value
     loudness = slider_amp.value
 
-    return loops, loudness, start_time
+    return loops, loudness, ptch, spd, start_time
 
 
 @app.cell
@@ -417,9 +417,9 @@ def _(mo):
 @app.cell
 def _(mo):
     # reporpoise
-    slider_f = mo.ui.slider(1, 10, label='Loop audio?')
-    slider_f
-    return (slider_f,)
+    slider_pitch = mo.ui.slider(0, 2, label='Pitch')
+    slider_pitch
+    return (slider_pitch,)
 
 
 @app.cell
@@ -444,11 +444,23 @@ def _(mo):
     # any cells referencing that button will automatically run.
     button_addclip = mo.ui.run_button(label='Add to Symphony')
     button_addclip
-    return
+    return (button_addclip,)
 
 
 @app.cell
-def _():
+def _(
+    audio_selected,
+    button_addclip,
+    clips_to_add,
+    loops,
+    loudness,
+    ptch,
+    spd,
+    start_time,
+):
+    if button_addclip.value:
+        print('ADDING A CLIP!!!')
+        clips_to_add.loc[len(clips_to_add)] = [audio_selected, start_time, loops, loudness, ptch, spd]
     return
 
 
@@ -473,6 +485,11 @@ def _(mo):
 @app.cell
 def _(mo):
     mo.md(r"""### Acoustic Modifiers""")
+    return
+
+
+@app.cell
+def _():
     return
 
 
@@ -674,82 +691,81 @@ def _():
     from pydub import AudioSegment
     from scipy.signal import resample
     from pydub.effects import speedup
-    return glob, ipd, os, resample, shutil, signal, wavfile
+    return ipd, pd, signal, wavfile
 
 
 @app.cell
-def _(glob, np, os, resample, shutil, signal, wavfile):
-    def pull_available_wavs(source_dir, target_dir, extension):
-        source_dir = os.path.expanduser(source_dir)
-        target_dir = os.path.expanduser(target_dir)
-
-        # Create target directory if it doesn't exist, make pattern to find wavs via glob match
-        os.makedirs(target_dir, exist_ok=True)
-        pattern = os.path.join(source_dir, f"*.{extension}")
-        matching_files = glob.glob(pattern, recursive=False)
-
-        # Add each file to a list
-        available_wavs = [f for f in glob.glob(pattern) if os.path.isfile(f)]
-
-        # Copy each file to target directory
-        for file_path in matching_files:
-            if os.path.isfile(file_path):
-                filename = os.path.basename(file_path)
-                target_path = os.path.join(target_dir, filename)
-                shutil.copy2(file_path, target_path)
-
-        return available_wavs
-
-    def process_one_clip_to_add(clip, start_time, loop_val, loud_val, ptch_spd_val, gensr=44100, max_len=10):
-        max_len = gensr * max_len
-        print('NEXT FILE____________________________')
+def _(librosa, np, signal, wavfile):
+    def process_one_clip_to_add(clip, start_time, loop_val, loud_val, ptch_val, spd_val, gen_sr=44100, max_len=60):
+        max_len = gen_sr * max_len
+        print("NEXT FILE____________________________")
         sr, d = wavfile.read(clip)
         if len(d.shape) > 1:
             d = d.mean(axis=1)
-        if np.max(np.abs(d)) != 0:
-            d = d / np.max(np.abs(d))
-        print('The raw sampling rate and length are: ', sr, len(d))
+        if np.max(np.abs(d)) != 0: d = d / np.max(np.abs(d))  # Normalize the amplitudes
+    
+        print("The raw sampling rate and length are: ", sr, len(d))
+
+        # Modify sampling rate to match the file we are building on
         if sr != 44100:
             ratio = 44100 / sr
-            d = signal.resample(d, int(len(d) * ratio))
+            d = signal.resample(d, int(len(d) * ratio))        # Use Fourier method for better quality
             sr = 44100
+    
+        # Loop
         sr_looped, d_looped = loop(sr, d, loop_val)
-        print('Length of looped file: ', len(d_looped))
+        print("Length of looped file: ", len(d_looped))
+
+        # Loudness
         sr_loop_amp, d_loop_amp = loud(sr_looped, d_looped, loud_val)
-        sr_loop_amp_ps, d_loop_amp_ps = pitch_speed(sr_loop_amp, d_loop_amp, ptch_spd_val)
-        sr = sr_loop_amp_ps
-        d = d_loop_amp_ps
+    
+        # Pitch
+        sr_loop_amp_p, d_loop_amp_p = pitch(sr_loop_amp, d_loop_amp, ptch_val)
+    
+        # Speed
+        sr_loop_amp_p_s, d_loop_amp_p_s = speed(sr_loop_amp_p, d_loop_amp_p, spd_val)
+
+        sr = sr_loop_amp_p_s
+        d = d_loop_amp_p_s
+    
+        # Length and start time adjustment
         start_chunk_len = start_time * sr
         strt_zero_chunk = np.zeros(start_chunk_len)
         padded_d = np.concatenate((strt_zero_chunk, d))
-        if len(padded_d) > 2646000:
-            d = padded_d[:2646000]
-        elif len(padded_d) < 2646000:
-            d = np.append(padded_d, np.zeros(2646000 - len(padded_d)))
-        else:
-            d = padded_d
-        return (sr, d)
+
+        if len(padded_d) > 2646000: d = padded_d[:2646000]
+        elif len(padded_d) < 2646000: d = np.append(padded_d, np.zeros(2646000 - len(padded_d)))
+        else: d = padded_d
+
+        return sr, d
+
 
     def loop(sr, d, num_loops):
         d_looped = np.tile(d, num_loops)
         sr_looped = sr
-        return (sr_looped, d_looped)
+        return sr_looped, d_looped
+
 
     def loud(sr, d, loud_val):
         d_amp = d * loud_val
         sr_amp = sr
-        return (sr_amp, d_amp)
+        return sr_amp, d_amp
 
-    def pitch_speed(sr, d, factor):
-        num_samples = int(len(d) / factor)
-        y_pitched = resample(d, num_samples)
+    def pitch(sr, d, factor):
+        d_pitched = librosa.effects.pitch_shift(y=d, sr=sr, n_steps=factor)
         sr_pitched = sr
-        return (sr_pitched, y_pitched)
-    return process_one_clip_to_add, pull_available_wavs
+        return sr_pitched, d_pitched
+
+    def speed(sr, d, factor):
+        d_sped = librosa.effects.time_stretch(d, rate=factor)
+        sr_sped = sr
+        return sr_sped, d_sped
+    return (process_one_clip_to_add,)
 
 
 @app.cell
 def _(np, plt, process_one_clip_to_add, wavfile):
+    # REMIX
     def combine_clips(base_song, clips_to_add):
         sr_base, d_base = wavfile.read(base_song)
         plt.figure(figsize=(10, 4))
@@ -776,14 +792,15 @@ def _(pull_available_wavs):
 
 
 @app.cell
-def _(np, wavfile):
+def _(np, pd, wavfile):
     sample_rate = 44100
     duration = 10
     empty_audio = np.zeros(int(sample_rate * duration), dtype=np.float32)
+    clips_to_add = pd.DataFrame(columns=['clip', 'start_time', 'loops', 'loudness', 'pitch', 'speed'])
 
     wavfile.write('my_song.wav', sample_rate, empty_audio)
     print("The original empty song file is length: ", len(empty_audio))
-    return
+    return (clips_to_add,)
 
 
 @app.cell
@@ -799,17 +816,22 @@ def _(avail_wavs, ipd, np, plt, wavfile):
 def _(avail_wavs, np, wavfile):
     ## SELECT YOUR CLIP:
     audio_selected = avail_wavs[4]
-    sr, d = wavfile.read(audio_selected)
-    d = d / np.max(np.abs(d))
+    sr_selected, d_selected = wavfile.read(audio_selected)
+    d_selected = d_selected / np.max(np.abs(d_selected))
     return (audio_selected,)
 
 
 @app.cell
-def _(audio_selected, clips_to_add, loops, loudness, ptch_spd, start_time):
-    clips_to_add.loc[len(clips_to_add)] = [audio_selected, start_time, loops, loudness, ptch_spd]
+def _(audio_selected, clips_to_add, loops, loudness, ptch, spd, start_time):
+    clips_to_add.loc[len(clips_to_add)] = [audio_selected, start_time, loops, loudness, ptch, spd]
     print(clips_to_add)
     for index, clip in enumerate(clips_to_add['clip']):
         print(clip.split("temp", 1)[-1])
+    return
+
+
+@app.cell
+def _():
     return
 
 
