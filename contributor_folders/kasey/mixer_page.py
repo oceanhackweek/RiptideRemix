@@ -24,7 +24,13 @@ def _():
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""Welcome to RipTide Remix! {WRITE BLURB ABOUT WHAT THIS IS AND HOW TO INTERACT WITH IT}""")
+    mo.md(
+        r"""
+    Welcome aboard, sound adventurer! You’ve just discovered RiptideRemix, where the ocean’s voice becomes your instrument. From the haunting songs of whales to the crackle of shifting ice, every sound in our Ocean Sound Library is a piece of the sea’s secret symphony. Your journey is simple: explore, play, and create. Start by diving into any recording—listen closely, tweak it, shape it, and make it your own. Once you’ve crafted your perfect soundscape, layer your favorites together to build a song as wild and free as the ocean itself.
+
+    Ready to make some waves? Let’s dive in.
+    """
+    )
     return
 
 
@@ -220,10 +226,9 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-    Ahoy, explorer! 
-    You’ve stumbled upon the Ocean Sound Library, a treasure chest of the sea’s secrets. Here you’ll hear glaciers groaning, icebergs cracking, whales singing their heart out, and even the occasional crocodile making mischief.
+    Ahoy, explorer! Here lies a treasure chest of the sea’s secrets. Drift through our collection and discover glaciers groaning, icebergs cracking, whales singing their hearts out, and even the occasional mischievous crocodile.
 
-    Ready to set sail? Just click “Explore this sound” to dive deeper into any recording and uncover the stories hidden in the waves.
+    Click “Explore this sound” to dive deeper into any recording and uncover the stories hidden in the waves.
     """
     )
     return
@@ -407,9 +412,15 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-    Each clip is yours to play with—speed it up to make it race, slow it down to let it drift, shift the frequency to soar into the skies or rumble in the deep, and adjust the amplitude to whisper or roar.
+    Here’s where the fun begins. Each clip is yours to play with:
 
-    When you’ve crafted the sound just the way you like, click “Add to Song” to weave it into your grand ocean symphony.
+    * Speed it up to make it race like a storm or slow it down to let it drift like a lazy current.
+
+    * Shift the frequency to soar into the skies or rumble in the deep.
+
+    * Adjust the amplitude to make it whisper or roar.
+
+    Experiment freely—the ocean has endless voices, and now they’re in your hands. When you’ve crafted the sound just the way you like, click “Add to Song” to weave it into your grand ocean symphony.
     """
     )
     return
@@ -429,13 +440,7 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-    Here’s where your ocean symphony comes together. Watch your creation take shape through the waveform (the rolling tides of your song) and the spectrogram (a colorful map of its hidden patterns).
-
-    Listen, layer, and fine-tune until your piece feels just right. When you’re ready to set it free, click Export to send your song sailing off into the world.
-    """
-    )
+    mo.md(r"""Here’s where your ocean melody comes together. Watch your creation take shape through the waveform (the rolling tides of your song) and the spectrogram (a colorful map of its hidden patterns). Layer, blend, and fine-tune until your composition feels just right. When your symphony is complete, click “Export” to set it free.""")
     return
 
 
