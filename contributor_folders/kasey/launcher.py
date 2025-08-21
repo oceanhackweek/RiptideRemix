@@ -18,7 +18,6 @@ server = (
     .with_app(path="", root= basePath / "contributor_folders" / "kasey" / "mixer_page.py")
     .with_app(path="/about", root= basePath / "contributor_folders" / "kasey" / "about_team.py")
     .with_app(path="/learn", root = basePath / "contributor_folders" / "kasey" / "learn_more.py")
-    .with_app(path="/gather", root = basePath / "contributor_folders" / "kasey" / "mixer_page.py")
 )
 
 # Create a FastAPI app

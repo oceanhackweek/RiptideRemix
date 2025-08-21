@@ -236,24 +236,14 @@ def _(mo):
 @app.cell(column=1)
 def _(mo):
     import webbrowser
-    gather_button = mo.ui.button(
-        label="Gather Data",
-        kind='neutral',
-        on_click=lambda _: webbrowser.open("http://10.19.147.127:8000/gather", new=0)  # URL for Gather page
-    )
-    gather_button
-    return (webbrowser,)
 
-
-@app.cell
-def _(mo, webbrowser):
     mix_button = mo.ui.button(
         label="Mix Sounds",
         kind='neutral',
         on_click=lambda _: webbrowser.open("http://10.19.147.127:8000/", new=0)  # URL for Mixer page
     )
     mix_button
-    return
+    return (webbrowser,)
 
 
 @app.cell
