@@ -195,35 +195,44 @@ def _(mo):
 
 @app.cell(column=1)
 def _(mo):
+    import webbrowser
     gather_button = mo.ui.button(
-        value=0, on_click=lambda value: value + 1, label="Gather Data", kind='neutral'
+        label="Gather Data",
+        kind='neutral',
+        on_click=lambda _: webbrowser.open("http://10.19.147.127:8000/gather", new=0)
     )
     gather_button
-    return
+    return (webbrowser,)
 
 
 @app.cell
-def _(mo):
+def _(mo, webbrowser):
     mix_button = mo.ui.button(
-        value=0, on_click=lambda value: value + 1, label="Mix Sounds", kind='neutral'
+        label="Mix Sounds",
+        kind='neutral',
+        on_click=lambda _: webbrowser.open("http://10.19.147.127:8000/", new=0)
     )
     mix_button
     return
 
 
 @app.cell
-def _(mo):
+def _(mo, webbrowser):
     educate_button = mo.ui.button(
-        value=0, on_click=lambda value: value + 1, label="Learn More", kind='neutral'
+        label="Learn More",
+        kind='neutral',
+        on_click=lambda _: webbrowser.open("http://10.19.147.127:8000/learn", new=0)
     )
     educate_button
     return
 
 
 @app.cell
-def _(mo):
+def _(mo, webbrowser):
     about_button = mo.ui.button(
-        value=0, on_click=lambda value: value + 1, label="About the Team", kind='neutral'
+        label="Meet the Team",
+        kind='neutral',
+        on_click=lambda _: webbrowser.open("http://10.19.147.127:8000/about", new=0)
     )
     about_button
     return
@@ -694,7 +703,7 @@ def _(librosa, np, signal, wavfile):
         if len(d.shape) > 1:
             d = d.mean(axis=1)
         if np.max(np.abs(d)) != 0: d = d / np.max(np.abs(d))  # Normalize the amplitudes
-    
+
         print("The raw sampling rate and length are: ", sr, len(d))
 
         # Modify sampling rate to match the file we are building on
@@ -702,23 +711,23 @@ def _(librosa, np, signal, wavfile):
             ratio = 44100 / sr
             d = signal.resample(d, int(len(d) * ratio))        # Use Fourier method for better quality
             sr = 44100
-    
+
         # Loop
         sr_looped, d_looped = loop(sr, d, loop_val)
         print("Length of looped file: ", len(d_looped))
 
         # Loudness
         sr_loop_amp, d_loop_amp = loud(sr_looped, d_looped, loud_val)
-    
+
         # Pitch
         sr_loop_amp_p, d_loop_amp_p = pitch(sr_loop_amp, d_loop_amp, ptch_val)
-    
+
         # Speed
         sr_loop_amp_p_s, d_loop_amp_p_s = speed(sr_loop_amp_p, d_loop_amp_p, spd_val)
 
         sr = sr_loop_amp_p_s
         d = d_loop_amp_p_s
-    
+
         # Length and start time adjustment
         start_chunk_len = start_time * sr
         strt_zero_chunk = np.zeros(start_chunk_len)

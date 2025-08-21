@@ -180,7 +180,6 @@ def _(mo):
     ## Dwight Owens
 
     Dwight is a Development Manager at Ocean Networks Canada and served as a mentor for this project. His favorite oceanic sound is an orca call.
-
     """
     )
     return
