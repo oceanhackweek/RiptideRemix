@@ -4,7 +4,7 @@ __generated_with = "0.14.17"
 app = marimo.App(
     width="columns",
     app_title="RiptideRemix_mixer",
-    layout_file="layouts/mixer_page.grid.json",
+    layout_file="layouts/about_team.grid.json",
 )
 
 
@@ -93,10 +93,10 @@ def _(mo):
 @app.cell
 def _(basePath, mo):
     mo.image(
-        src= basePath / "Images" / "welcome.png",
+        src= basePath / "Images" / "squirrel.JPG",
         alt="placeholder",
-        width=75,
-        height=75,
+        width=200,
+        height=200,
         rounded=False,
         caption=""
     )
