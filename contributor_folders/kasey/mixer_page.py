@@ -10,9 +10,23 @@ app = marimo.App(
 
 @app.cell(column=0)
 def _():
+    import platform
+    from pathlib import Path
+
+    # Detect OS and set project root accordingly
+    if platform.system() == "Windows":
+        basePath = Path("C:/Users/kasey/Desktop/ohw25_proj_RiptideRemix")
+    else:
+        basePath = Path("/home/jovyan/ohw25_proj_RiptideRemix")
+    return (basePath,)
+
+
+@app.cell
+def _(basePath):
     import marimo as mo
+
     mo.image(
-        src="/home/jovyan/ohw25_proj_RiptideRemix/Images/logo_flat.jpg",
+        src = basePath / "Images" / "logo_flat.jpg",
         alt="placeholder",
         width=1200,
         height=100,
@@ -41,9 +55,9 @@ def _(mo):
 
 
 @app.cell
-def _(mo):
+def _(basePath, mo):
     mo.image(
-        src="/home/jovyan/ohw25_proj_RiptideRemix/Images/ArtGifs/placeholder.gif",
+        src = basePath / "Images" / "ArtGifs" / "placeholder.gif",
         alt="placeholder",
         width=1200,
         height=200,
@@ -78,9 +92,9 @@ def _(mo):
 
 
 @app.cell
-def _(mo):
+def _(basePath, mo):
     mo.image(
-        src="/home/jovyan/ohw25_proj_RiptideRemix/Images/squirrel.JPG",
+        src = basePath / "Images" / "squirrel.JPG",
         alt="placeholder",
         width=200,
         height=200,
@@ -91,9 +105,10 @@ def _(mo):
 
 
 @app.cell
-def _(mo):
-    file_browser = mo.ui.file_browser(
-        initial_path="/home/jovyan/ohw25_proj_RiptideRemix/data", multiple=True)
+def _(basePath, mo):
+
+
+    file_browser = mo.ui.file_browser( initial_path= basePath / "data", multiple=True)
     return
 
 
@@ -218,7 +233,7 @@ def _(mo):
 
 @app.cell(column=2)
 def _(mo):
-    mo.md(r"""## LIBRARY""")
+    mo.md(r"""# LIBRARY""")
     return
 
 
@@ -360,7 +375,7 @@ def _(mo):
 
 @app.cell(column=3)
 def _(mo):
-    mo.md(r"""## Clip Editor""")
+    mo.md(r"""# Clip Editor""")
     return
 
 
@@ -434,7 +449,7 @@ def _(mo):
 
 @app.cell(column=4)
 def _(mo):
-    mo.md(r"""## MIXER""")
+    mo.md(r"""# MIXER""")
     return
 
 
@@ -554,9 +569,9 @@ def _(plt):
 
 
 @app.cell(column=5)
-def _(mo):
+def _(basePath, mo):
     mo.image(
-        src="/home/jovyan/ohw25_proj_RiptideRemix/Images/logo.png",
+        src = basePath / "Images" / "logo.png",
         alt="Logo",
         width=100,
         height=100,

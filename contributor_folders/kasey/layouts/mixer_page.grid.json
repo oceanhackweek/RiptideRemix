@@ -7,6 +7,9 @@
     "bordered": true,
     "cells": [
       {
+        "position": null
+      },
+      {
         "position": [
           0,
           0,
