@@ -258,7 +258,7 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    soundclass_dropdown = mo.ui.dropdown(options={'Seismic Event': 1, 'Cetacean Call': 2, 'Other': 3})
+    soundclass_dropdown = mo.ui.dropdown(options={'Anthropogenic': 1, 'Cetacean Call': 2, 'Seismic Event': 3})
     return (soundclass_dropdown,)
 
 
@@ -307,54 +307,50 @@ def _(mo):
 @app.cell
 def _(mo, soundclass_dropdown):
     if soundclass_dropdown.selected_key == 'Seismic Event':
-        labelopts = {} # replace with available_wavs/seismic
+        labelopts = {'Japan 2011': 1, 'Alaska 2021': 2, 'Russia 2025': 3, 'Misc': 4}
     elif soundclass_dropdown.selected_key == 'Cetacean Call':
-        labelopts = {} # replace with available_wavs/cetacean
+        labelopts = {'Mysticetes': 1, 'Odontocetes': 2} # replace with available_wavs/cetacean
     else:
         labelopts = {} # replace with available_wavs/other
 
     class_dropdown = mo.ui.dropdown(options=labelopts)
-    # class_dropdown
+    class_dropdown
     return (class_dropdown,)
 
 
 @app.cell
 def _(class_dropdown, mo, soundclass_dropdown):
     if soundclass_dropdown.selected_key == 'Seismic Event':
-        labelopts_sc = {'P-Wave': 1, 'S-Wave': 2, 'Love Wave': 3, 'Raliegh Wave': 4}
+        labelopts_sc = {}
     elif soundclass_dropdown.selected_key == 'Cetacean Call' and class_dropdown.selected_key == 'Mysticetes':
-        labelopts_sc = {'Blue Whale': 1, 'Humpback Whale': 2}
+        labelopts_sc = {'Bowhead whale': 1, 'Humpback whale': 2}
     elif soundclass_dropdown.selected_key == 'Cetacean Call' and class_dropdown.selected_key == 'Odontocetes':
-        labelopts_sc = {'Orca': 1, 'Sperm Whale': 2}
+        labelopts_sc = {'Orca': 1, 'Sperm whale': 2}
+    elif soundclass_dropdown.selected_key == 'Other':
+        labelopts_sc = {}
     else:
         labelopts_sc = {'Beans': 1, 'Toast': 2}
 
     subclass_dropdown = mo.ui.dropdown(options=labelopts_sc)
-    # subclass_dropdown
+    subclass_dropdown
     return (subclass_dropdown,)
 
 
 @app.cell
-def _(class_dropdown, mo, soundclass_dropdown, subclass_dropdown):
-    if soundclass_dropdown.selected_key == 'Seismic Event' and subclass_dropdown.selected_key == 'P-Wave':
-        labelopts_sites = {'Site1': 1, 'Site2': 2}
-    if soundclass_dropdown.selected_key == 'Seismic Event' and subclass_dropdown.selected_key == 'S-Wave':
-        labelopts_sites = {'Site1': 1, 'Site2': 2}
-    elif soundclass_dropdown.selected_key == 'Cetacean Call' and class_dropdown.selected_key == 'Mysticetes' and subclass_dropdown.selected_key == 'Blue Whale':
-        labelopts_sites = {'Site1': 1, 'Site2': 2}
-    elif soundclass_dropdown.selected_key == 'Cetacean Call' and class_dropdown.selected_key == 'Odontocetes':
-        labelopts_sites = {'Site1': 1, 'Site2': 2}
+def _(class_dropdown, os, soundclass_dropdown, subclass_dropdown):
+    if soundclass_dropdown.selected_key == 'Cetacean Call':
+        clip_list = os.listdir(os.path.join('ohw25_proj_RiptideRemix', 'Library', 'Cetacean', class_dropdown.selected_key, subclass_dropdown.selected_key))
+    elif soundclass_dropdown.selected_key == 'Seismic Event':
+        clip_list = os.listdir(os.path.join('ohw25_proj_RiptideRemix', 'Library', 'Seismic', class_dropdown.selected_key))
     else:
-        labelopts_sites = {'Beans': 1, 'Toast': 2}
-
-    site_dropdown = mo.ui.dropdown(options=labelopts_sites)
-    # site_dropdown
-    return
+        clip_list = os.listdir(os.path.join('ohw25_proj_RiptideRemix', 'Library', soundclass_dropdown.selected_key))
+    return (clip_list,)
 
 
 @app.cell
-def _(mo):
-    clip_dropdown = mo.ui.dropdown(options={'Clip1': 1, 'Clip2': 2}, value='Clip1')
+def _(clip_list, mo):
+    clip_dict = {clip_list[i]: i for i in range(len(clip_list))}
+    clip_dropdown = mo.ui.dropdown(options=clip_dict)
     clip_dropdown
     return
 
@@ -691,7 +687,7 @@ def _():
     from pydub import AudioSegment
     from scipy.signal import resample
     from pydub.effects import speedup
-    return ipd, pd, signal, wavfile
+    return ipd, os, pd, signal, wavfile
 
 
 @app.cell
