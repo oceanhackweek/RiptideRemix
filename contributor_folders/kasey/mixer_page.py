@@ -67,80 +67,6 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    checkbox = mo.ui.checkbox(label="Loop audio")
-    return (checkbox,)
-
-
-@app.cell
-def _(checkbox, mo):
-    mo.hstack([checkbox, mo.md(f"Has value: {checkbox.value}")])
-    return
-
-
-@app.cell
-def _(checkbox):
-    if checkbox.value:
-        print('check!')
-    return
-
-
-@app.cell
-def _(mo):
-    # a button that when clicked will have its value set to True;
-    # any cells referencing that button will automatically run.
-    button_addclip = mo.ui.run_button(label='Add to Song')
-    button_addclip
-    return
-
-
-@app.cell
-def _(mo):
-    slider_t = mo.ui.slider(1.0, 60.0, label='Time in Song (s)')
-    slider_t
-    return
-
-
-@app.cell
-def _(mo):
-    slider_f = mo.ui.slider(1, 10, label='Cent. Frequency')
-    slider_f
-    return
-
-
-@app.cell
-def _(mo):
-    slider_amp = mo.ui.slider(1, 10, label='Amplitude (dB)')
-    slider_amp
-    return
-
-
-@app.cell
-def _(mo):
-    dropdown = mo.ui.dropdown(options={'Seismic activity': 1, 'Whale song': 2}, value='Seismic activity')
-    return (dropdown,)
-
-
-@app.cell
-def _(dropdown):
-    dropdown
-    return
-
-
-@app.cell
-def _(dropdown):
-    if dropdown.selected_key == 'Seismic activity':
-        display = 'seismic event recordings'
-    elif dropdown.selected_key == 'Whale song':
-        display = 'whale song recordings'
-    else:
-        display = 'ERROR'
-
-    print(f'Currently displaying {display}')
-    return
-
-
-@app.cell
-def _(mo):
     mo.md(r"""What if users had the option to save their song when they were happy with it?""")
     return
 
@@ -174,12 +100,6 @@ def _(mo):
 @app.cell
 def _(file_browser):
     file_browser
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(r"""## LIBRARY""")
     return
 
 
@@ -322,6 +242,42 @@ def _(boxes, plot_time_freq_boxes):
     return
 
 
+@app.cell
+def _(mo):
+    mo.md(r"""---""")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""---""")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""---""")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""---""")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""---""")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""---""")
+    return
+
+
 @app.cell(column=1)
 def _(mo):
     gather_button = mo.ui.button(
@@ -355,6 +311,229 @@ def _(mo):
         value=0, on_click=lambda value: value + 1, label="About the Team", kind='neutral'
     )
     about_button
+    return
+
+
+@app.cell(column=2)
+def _(mo):
+    mo.md(r"""## LIBRARY""")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    Ahoy, explorer! 
+    You’ve stumbled upon the Ocean Sound Library, a treasure chest of the sea’s secrets. Here you’ll hear glaciers groaning, icebergs cracking, whales singing their heart out, and even the occasional crocodile making mischief.
+
+    Ready to set sail? Just click “Explore this sound” to dive deeper into any recording and uncover the stories hidden in the waves.
+    """
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    soundclass_dropdown = mo.ui.dropdown(options={'Seismic Event': 1, 'Cetacean Call': 2}, value='Seismic Event')
+    return (soundclass_dropdown,)
+
+
+@app.cell
+def _(soundclass_dropdown):
+    soundclass_dropdown
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""### Choose Your Clip:""")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""Category:""")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""Class:""")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""Subclass/Network:""")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""Station:""")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""Clip:""")
+    return
+
+
+@app.cell
+def _(mo, soundclass_dropdown):
+    if soundclass_dropdown.selected_key == 'Seismic Event':
+        labelopts = {'Japan Earthquake, 2011': 1, 'Russia Earthquake, 2019': 2, 'Other Seismic Event, Year': 3}
+    elif soundclass_dropdown.selected_key == 'Cetacean Call':
+        labelopts = {'Mysticetes': 1, 'Odontocetes': 2}
+    else:
+        labelopts = {'Beans': 1, 'Toast': 2}
+
+    class_dropdown = mo.ui.dropdown(options=labelopts)
+    class_dropdown
+    return (class_dropdown,)
+
+
+@app.cell
+def _(class_dropdown, mo, soundclass_dropdown):
+    if soundclass_dropdown.selected_key == 'Seismic Event':
+        labelopts_sc = {'P-Wave': 1, 'S-Wave': 2, 'Love Wave': 3, 'Raliegh Wave': 4}
+    elif soundclass_dropdown.selected_key == 'Cetacean Call' and class_dropdown.selected_key == 'Mysticetes':
+        labelopts_sc = {'Blue Whale': 1, 'Humpback Whale': 2}
+    elif soundclass_dropdown.selected_key == 'Cetacean Call' and class_dropdown.selected_key == 'Odontocetes':
+        labelopts_sc = {'Orca': 1, 'Sperm Whale': 2}
+    else:
+        labelopts_sc = {'Beans': 1, 'Toast': 2}
+
+    subclass_dropdown = mo.ui.dropdown(options=labelopts_sc)
+    subclass_dropdown
+    return (subclass_dropdown,)
+
+
+@app.cell
+def _(class_dropdown, mo, soundclass_dropdown, subclass_dropdown):
+    if soundclass_dropdown.selected_key == 'Seismic Event' and subclass_dropdown.selected_key == 'P-Wave':
+        labelopts_sites = {'Site1': 1, 'Site2': 2}
+    if soundclass_dropdown.selected_key == 'Seismic Event' and subclass_dropdown.selected_key == 'S-Wave':
+        labelopts_sites = {'Site1': 1, 'Site2': 2}
+    elif soundclass_dropdown.selected_key == 'Cetacean Call' and class_dropdown.selected_key == 'Mysticetes' and subclass_dropdown.selected_key == 'Blue Whale':
+        labelopts_sites = {'Site1': 1, 'Site2': 2}
+    elif soundclass_dropdown.selected_key == 'Cetacean Call' and class_dropdown.selected_key == 'Odontocetes':
+        labelopts_sites = {'Site1': 1, 'Site2': 2}
+    else:
+        labelopts_sites = {'Beans': 1, 'Toast': 2}
+
+    site_dropdown = mo.ui.dropdown(options=labelopts_sites)
+    site_dropdown
+    return
+
+
+@app.cell
+def _(mo):
+    clip_dropdown = mo.ui.dropdown(options={'Clip1': 1, 'Clip2': 2}, value='Clip1')
+    clip_dropdown
+    return
+
+
+@app.cell
+def _(mo):
+    button_libraryplay = mo.ui.run_button(label='Play')
+    button_libraryplay
+    return
+
+
+@app.cell
+def _(mo):
+    button_libraryadd = mo.ui.run_button(label='Explore this sound')
+    button_libraryadd
+    return
+
+
+@app.cell
+def _(mo):
+    library_loop = mo.ui.checkbox(label="Loop audio")
+    library_loop
+    return
+
+
+@app.cell(column=3)
+def _(mo):
+    slider_t = mo.ui.slider(1.0, 60.0, label='Time in Song (s)')
+    slider_t
+    return
+
+
+@app.cell
+def _(mo):
+    slider_speed = mo.ui.slider(1, 10, label='Speed')
+    slider_speed
+    return
+
+
+@app.cell
+def _(mo):
+    slider_f = mo.ui.slider(1, 10, label='Central Frequency (Hz)')
+    slider_f
+    return
+
+
+@app.cell
+def _(mo):
+    slider_amp = mo.ui.slider(1, 10, label='Amplitude (dB)')
+    slider_amp
+    return
+
+
+@app.cell
+def _(mo):
+    editor_loop = mo.ui.checkbox(label="Loop audio")
+    editor_loop
+    return
+
+
+@app.cell
+def _(mo):
+    # a button that when clicked will have its value set to True;
+    # any cells referencing that button will automatically run.
+    button_addclip = mo.ui.run_button(label='Add to Symphony')
+    button_addclip
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    Each clip is yours to play with—speed it up to make it race, slow it down to let it drift, shift the frequency to soar into the skies or rumble in the deep, and adjust the amplitude to whisper or roar.
+
+    When you’ve crafted the sound just the way you like, click “Add to Song” to weave it into your grand ocean symphony.
+    """
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""### Acoustic Modifiers""")
+    return
+
+
+@app.cell(column=4)
+def _(mo):
+    mo.md(r"""## MIXER""")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    Here’s where your ocean symphony comes together. Watch your creation take shape through the waveform (the rolling tides of your song) and the spectrogram (a colorful map of its hidden patterns).
+
+    Listen, layer, and fine-tune until your piece feels just right. When you’re ready to set it free, click Export to send your song sailing off into the world.
+    """
+    )
     return
 
 
