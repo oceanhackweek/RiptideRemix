@@ -224,17 +224,12 @@
         ]
       },
       {
-        "position": [
-          0,
-          29,
-          1,
-          2
-        ]
+        "position": null
       },
       {
         "position": [
           0,
-          31,
+          29,
           1,
           2
         ]
@@ -257,19 +252,13 @@
         ]
       },
       {
-        "position": [
-          1,
-          29,
-          2,
-          2
-        ],
-        "side": "right"
+        "position": null
       },
       {
         "position": [
-          1,
+          0,
           31,
-          2,
+          3,
           2
         ],
         "side": "right"
