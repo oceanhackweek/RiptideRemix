@@ -22,13 +22,12 @@ def _():
 
 
 @app.cell
-def _(basePath):
-    theme = "dark"
+def _():
     return
 
 
 @app.cell
-def _():
+def _(basePath):
     import marimo as mo
 
     mo.image(
