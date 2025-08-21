@@ -41,12 +41,11 @@ def _():
     from obspy.taup import TauPyModel
     from obspy.geodetics import locations2degrees
     from obspy.geodetics.base import gps2dist_azimuth
-    return Client, TauPyModel, locations2degrees
+    return Client, TauPyModel, UTCDateTime, locations2degrees
 
 
 @app.cell
-def _():
-    from obspy import UTCDateTime
+def _(UTCDateTime):
     big_events = { "Japan_2011": { "start_time": UTCDateTime("2011-03-11T05:46:23"), 
                                   "latitude": 38.297, "longitude": 142.372, "depth_km": 29
                                  },
