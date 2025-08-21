@@ -39,7 +39,7 @@ def _(mo):
     mo.image(
         src="/home/jovyan/ohw25_proj_RiptideRemix/Images/ArtGifs/placeholder.gif",
         alt="placeholder",
-        width=750,
+        width=1200,
         height=200,
         rounded=False,
         caption=""
@@ -86,33 +86,11 @@ def _(checkbox):
 
 @app.cell
 def _(mo):
-    increment_button = mo.ui.button(
-        value=0, on_click=lambda value: value + 1, label="increment", kind="warn"
-    )
-    return (increment_button,)
-
-
-@app.cell
-def _(increment_button):
-    increment_button.value
-    return
-
-
-@app.cell
-def _(increment_button):
-    increment_button
-    return
-
-
-app._unparsable_cell(
-    r"""
     # a button that when clicked will have its value set to True;
     # any cells referencing that button will automatically run.
-    button_addclip = mo.ui.run_button(, label='Add to Song')
+    button_addclip = mo.ui.run_button(label='Add to Song')
     button_addclip
-    """,
-    name="_"
-)
+    return
 
 
 @app.cell
@@ -124,7 +102,7 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    slider_f = mo.ui.slider(1, 10, label='Cent. Frequency (Hz)')
+    slider_f = mo.ui.slider(1, 10, label='Cent. Frequency')
     slider_f
     return
 
