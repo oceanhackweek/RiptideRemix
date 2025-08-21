@@ -197,32 +197,35 @@ def _(mo):
 def _(mo):
     import webbrowser
 
+    gather_button = mo.ui.button(
+        value=0, on_click=lambda value: value + 1, label="Gather Data", kind='neutral'
+    )
+    gather_button
+    return
+
+
+@app.cell
+def _(mo):
     mix_button = mo.ui.button(
-        label="Mix Sounds",
-        kind='neutral',
-        on_click=lambda _: webbrowser.open("http://10.19.147.127:8000/", new=0)
+        value=0, on_click=lambda value: value + 1, label="Mix Sounds", kind='neutral'
     )
     mix_button
     return (webbrowser,)
 
 
 @app.cell
-def _(mo, webbrowser):
+def _(mo):
     educate_button = mo.ui.button(
-        label="Learn More",
-        kind='neutral',
-        on_click=lambda _: webbrowser.open("http://10.19.147.127:8000/learn", new=0)
+        value=0, on_click=lambda value: value + 1, label="Learn More", kind='neutral'
     )
     educate_button
     return
 
 
 @app.cell
-def _(mo, webbrowser):
+def _(mo):
     about_button = mo.ui.button(
-        label="Meet the Team",
-        kind='neutral',
-        on_click=lambda _: webbrowser.open("http://10.19.147.127:8000/about", new=0)
+        value=0, on_click=lambda value: value + 1, label="About the Team", kind='neutral'
     )
     about_button
     return
@@ -329,12 +332,15 @@ def _(class_dropdown, mo, soundclass_dropdown):
 @app.cell
 def _(class_dropdown, os, soundclass_dropdown, subclass_dropdown):
     if soundclass_dropdown.selected_key == 'Cetacean Call':
-        clip_list = os.listdir(os.path.join('ohw25_proj_RiptideRemix', 'Library', 'Cetacean', class_dropdown.selected_key, subclass_dropdown.selected_key))
+        clips_path = os.path.join('ohw25_proj_RiptideRemix', 'Library', 'Cetacean', class_dropdown.selected_key, subclass_dropdown.selected_key)
+        clip_list = os.listdir(clips_path)
     elif soundclass_dropdown.selected_key == 'Seismic Event':
-        clip_list = os.listdir(os.path.join('ohw25_proj_RiptideRemix', 'Library', 'Seismic', class_dropdown.selected_key))
+        clips_path = os.path.join('ohw25_proj_RiptideRemix', 'Library', 'Seismic', class_dropdown.selected_key)
+        clip_list = os.listdir(clips_path)
     else:
-        clip_list = os.listdir(os.path.join('ohw25_proj_RiptideRemix', 'Library', soundclass_dropdown.selected_key))
-    return (clip_list,)
+        clips_path = os.path.join('ohw25_proj_RiptideRemix', 'Library', soundclass_dropdown.selected_key)
+        clip_list = os.listdir(clips_path)
+    return clip_list, clips_path
 
 
 @app.cell
@@ -342,6 +348,12 @@ def _(clip_list, mo):
     clip_dict = {clip_list[i]: i for i in range(len(clip_list))}
     clip_dropdown = mo.ui.dropdown(options=clip_dict)
     clip_dropdown
+    return (clip_dropdown,)
+
+
+@app.cell
+def _(clip_dropdown, clips_path, mo, os):
+    mo.audio(os.path.join(clips_path, clip_dropdown.selected_key))
     return
 
 
@@ -353,9 +365,11 @@ def _(mo):
 
 
 @app.cell
-def _(mo):
-    button_libraryadd = mo.ui.run_button(label='Explore this sound')
-    button_libraryadd
+def _():
+    # Keep this for displaying wave form, spectrogram, and explanation of clip
+    # stretch goal for educational piece
+    # button_libraryadd = mo.ui.run_button(label='Explore this sound')
+    # button_libraryadd
     return
 
 
@@ -677,7 +691,7 @@ def _():
     from pydub import AudioSegment
     from scipy.signal import resample
     from pydub.effects import speedup
-    return ipd, os, pd, signal, wavfile
+    return os, pd, signal, wavfile
 
 
 @app.cell
@@ -689,7 +703,7 @@ def _(librosa, np, signal, wavfile):
         if len(d.shape) > 1:
             d = d.mean(axis=1)
         if np.max(np.abs(d)) != 0: d = d / np.max(np.abs(d))  # Normalize the amplitudes
-
+    
         print("The raw sampling rate and length are: ", sr, len(d))
 
         # Modify sampling rate to match the file we are building on
@@ -697,23 +711,23 @@ def _(librosa, np, signal, wavfile):
             ratio = 44100 / sr
             d = signal.resample(d, int(len(d) * ratio))        # Use Fourier method for better quality
             sr = 44100
-
+    
         # Loop
         sr_looped, d_looped = loop(sr, d, loop_val)
         print("Length of looped file: ", len(d_looped))
 
         # Loudness
         sr_loop_amp, d_loop_amp = loud(sr_looped, d_looped, loud_val)
-
+    
         # Pitch
         sr_loop_amp_p, d_loop_amp_p = pitch(sr_loop_amp, d_loop_amp, ptch_val)
-
+    
         # Speed
         sr_loop_amp_p_s, d_loop_amp_p_s = speed(sr_loop_amp_p, d_loop_amp_p, spd_val)
 
         sr = sr_loop_amp_p_s
         d = d_loop_amp_p_s
-
+    
         # Length and start time adjustment
         start_chunk_len = start_time * sr
         strt_zero_chunk = np.zeros(start_chunk_len)
@@ -772,13 +786,14 @@ def _(np, plt, process_one_clip_to_add, wavfile):
 
 
 @app.cell
-def _(pull_available_wavs):
-    avail_wavs = pull_available_wavs("~/ohw25_proj_RiptideRemix/data/template_sounds", "~/ohw25_proj_RiptideRemix/contributor_folders/isabelle/audio_processing_mixers/available_wavs", "wav")
-    return (avail_wavs,)
+def _(clip_list):
+    avail_wavs = clip_list
+    return
 
 
 @app.cell
 def _(np, pd, wavfile):
+    # clear audio
     sample_rate = 44100
     duration = 10
     empty_audio = np.zeros(int(sample_rate * duration), dtype=np.float32)
@@ -786,22 +801,20 @@ def _(np, pd, wavfile):
 
     wavfile.write('my_song.wav', sample_rate, empty_audio)
     print("The original empty song file is length: ", len(empty_audio))
+    print(clips_to_add)
     return (clips_to_add,)
 
 
 @app.cell
-def _(avail_wavs, ipd, np, plt, wavfile):
-    sr, d = wavfile.read(avail_wavs[1])
-    plt.figure(figsize=(10, 4))
-    plt.plot(np.arange(0, len(d)) / sr, d, 'b')
-    ipd.Audio(avail_wavs[0])
+def _(clip_dropdown, clips_path, os):
+    os.path.join(clips_path, clip_dropdown.selected_key)
     return
 
 
 @app.cell
-def _(avail_wavs, np, wavfile):
+def _(clip_dropdown, clips_path, np, os, wavfile):
     ## SELECT YOUR CLIP:
-    audio_selected = avail_wavs[4]
+    audio_selected = os.path.join(clips_path, clip_dropdown.selected_key)
     sr_selected, d_selected = wavfile.read(audio_selected)
     d_selected = d_selected / np.max(np.abs(d_selected))
     return (audio_selected,)
@@ -810,7 +823,7 @@ def _(avail_wavs, np, wavfile):
 @app.cell
 def _(audio_selected, clips_to_add, loops, loudness, ptch, spd, start_time):
     clips_to_add.loc[len(clips_to_add)] = [audio_selected, start_time, loops, loudness, ptch, spd]
-    print(clips_to_add)
+
     for index, clip in enumerate(clips_to_add['clip']):
         print(clip.split("temp", 1)[-1])
     return
