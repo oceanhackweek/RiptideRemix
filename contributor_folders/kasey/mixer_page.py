@@ -537,5 +537,89 @@ def _(mo):
     return
 
 
+@app.cell
+def _(mo):
+    mo.md(r"""### Waveform:""")
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""### Spectrogram:""")
+    return
+
+
+@app.cell
+def _(mo):
+    button_mixerplay = mo.ui.run_button(label='Play')
+    button_mixerplay
+    return
+
+
+@app.cell
+def _(mo):
+    mixer_loop = mo.ui.checkbox(label="Loop audio")
+    mixer_loop
+    return
+
+
+@app.cell
+def _(mo):
+    # a button that when clicked will have its value set to True;
+    # any cells referencing that button will automatically run.
+    button_export = mo.ui.run_button(label='Export file')
+    button_export
+    return
+
+
+@app.cell(column=5)
+def _(mo):
+    mo.image(
+        src="/home/jovyan/ohw25_proj_RiptideRemix/Images/logo.png",
+        alt="Logo",
+        width=100,
+        height=100,
+        rounded=True,
+        caption=""
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""Thanks for your RiptideRemix! Your journey through sound has brought together whispers, rumbles, and songs of the sea. We’re so glad you set sail with us. Now take your creation, share it, and let it ripple out into the world.""")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""Derya""")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""Mattie""")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""Isabelle""")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""Kasey""")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""Oluwatofunmi""")
+    return
+
+
 if __name__ == "__main__":
     app.run()
