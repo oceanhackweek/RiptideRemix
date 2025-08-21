@@ -195,44 +195,35 @@ def _(mo):
 
 @app.cell(column=1)
 def _(mo):
-    import webbrowser
     gather_button = mo.ui.button(
-        label="Gather Data",
-        kind='neutral',
-        on_click=lambda _: webbrowser.open("http://10.19.147.127:8000/gather", new=0)  # URL for Gather page
+        value=0, on_click=lambda value: value + 1, label="Gather Data", kind='neutral'
     )
     gather_button
-    return (webbrowser,)
+    return
 
 
 @app.cell
-def _(mo, webbrowser):
+def _(mo):
     mix_button = mo.ui.button(
-        label="Mix Sounds",
-        kind='neutral',
-        on_click=lambda _: webbrowser.open("http://10.19.147.127:8000/", new=0)  # URL for Mixer page
+        value=0, on_click=lambda value: value + 1, label="Mix Sounds", kind='neutral'
     )
     mix_button
     return
 
 
 @app.cell
-def _(mo, webbrowser):
+def _(mo):
     educate_button = mo.ui.button(
-        label="Learn More",
-        kind='neutral',
-        on_click=lambda _: webbrowser.open("http://10.19.147.127:8000/learn", new=0)  # URL for Learn More
+        value=0, on_click=lambda value: value + 1, label="Learn More", kind='neutral'
     )
     educate_button
     return
 
 
 @app.cell
-def _(mo, webbrowser):
+def _(mo):
     about_button = mo.ui.button(
-        label="About the Team",
-        kind='neutral',
-        on_click=lambda _: webbrowser.open("http://10.19.147.127:8000/about", new=0)  # URL for About
+        value=0, on_click=lambda value: value + 1, label="About the Team", kind='neutral'
     )
     about_button
     return
@@ -258,7 +249,7 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    soundclass_dropdown = mo.ui.dropdown(options={'Seismic Event': 1, 'Cetacean Call': 2, 'Anthropogenic': 3, 'Other': 4})
+    soundclass_dropdown = mo.ui.dropdown(options={'Seismic Event': 1, 'Cetacean Call': 2, 'Other': 3})
     return (soundclass_dropdown,)
 
 
@@ -307,14 +298,14 @@ def _(mo):
 @app.cell
 def _(mo, soundclass_dropdown):
     if soundclass_dropdown.selected_key == 'Seismic Event':
-        labelopts = {'Japan Earthquake, 2011': 1, 'Russia Earthquake, 2019': 2, 'Other Seismic Event, Year': 3}
+        labelopts = {} # replace with available_wavs/seismic
     elif soundclass_dropdown.selected_key == 'Cetacean Call':
-        labelopts = {'Mysticetes': 1, 'Odontocetes': 2}
+        labelopts = {} # replace with available_wavs/cetacean
     else:
-        labelopts = {'Beans': 1, 'Toast': 2}
+        labelopts = {} # replace with available_wavs/other
 
     class_dropdown = mo.ui.dropdown(options=labelopts)
-    class_dropdown
+    # class_dropdown
     return (class_dropdown,)
 
 
@@ -330,7 +321,7 @@ def _(class_dropdown, mo, soundclass_dropdown):
         labelopts_sc = {'Beans': 1, 'Toast': 2}
 
     subclass_dropdown = mo.ui.dropdown(options=labelopts_sc)
-    subclass_dropdown
+    # subclass_dropdown
     return (subclass_dropdown,)
 
 
@@ -348,7 +339,7 @@ def _(class_dropdown, mo, soundclass_dropdown, subclass_dropdown):
         labelopts_sites = {'Beans': 1, 'Toast': 2}
 
     site_dropdown = mo.ui.dropdown(options=labelopts_sites)
-    site_dropdown
+    # site_dropdown
     return
 
 
