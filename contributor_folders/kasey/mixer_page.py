@@ -378,36 +378,53 @@ def _(mo):
 
 
 @app.cell
-def _(mo):
-    slider_t = mo.ui.slider(1.0, 60.0, label='Time in Song (s)')
-    slider_t
-    return
+def _(slider_amp, slider_f, slider_speed, slider_t):
+    start_time = slider_t.value
+    # ptch = slider_ptch.value
+    # spd = slider_speed.value
+    ptch_speed = slider_speed.value
+    loops = slider_f.value
+    loudness = slider_amp.value
+
+    return loops, loudness, start_time
 
 
 @app.cell
 def _(mo):
-    slider_speed = mo.ui.slider(1, 10, label='Speed')
+    # start time
+    slider_t = mo.ui.slider(0, 30.0, label='Time in Song (s)')
+    slider_t 
+    return (slider_t,)
+
+
+@app.cell
+def _(mo):
+    # ptch_spd
+    slider_speed = mo.ui.slider(0, 2, label='Speed')
     slider_speed
-    return
+    return (slider_speed,)
 
 
 @app.cell
 def _(mo):
-    slider_f = mo.ui.slider(1, 10, label='Central Frequency (Hz)')
+    # reporpoise
+    slider_f = mo.ui.slider(1, 10, label='Loop audio?')
     slider_f
-    return
+    return (slider_f,)
 
 
 @app.cell
 def _(mo):
+    # loudness
     slider_amp = mo.ui.slider(1, 10, label='Amplitude (dB)')
     slider_amp
-    return
+    return (slider_amp,)
 
 
 @app.cell
 def _(mo):
-    editor_loop = mo.ui.checkbox(label="Loop audio")
+    # should be loops slider
+    editor_loop = mo.ui.checkbox(label="TODO use or delete this")
     editor_loop
     return
 
@@ -418,6 +435,11 @@ def _(mo):
     # any cells referencing that button will automatically run.
     button_addclip = mo.ui.run_button(label='Add to Symphony')
     button_addclip
+    return
+
+
+@app.cell
+def _():
     return
 
 
@@ -618,6 +640,167 @@ def _(mo):
 @app.cell
 def _(mo):
     mo.md(r"""Dwight""")
+    return
+
+
+@app.cell(column=6)
+def _(mo):
+    mo.md(r"""# Underlying Python functions""")
+    return
+
+
+@app.cell
+def _():
+    import pandas as pd
+    import ffmpeg
+
+    import glob
+    import os
+    import shutil
+
+    import IPython.display as ipd
+    from scipy.io import wavfile
+    from scipy import signal
+
+    from pydub import AudioSegment
+    from scipy.signal import resample
+    from pydub.effects import speedup
+    return glob, ipd, os, resample, shutil, signal, wavfile
+
+
+@app.cell
+def _(glob, np, os, resample, shutil, signal, wavfile):
+    def pull_available_wavs(source_dir, target_dir, extension):
+        source_dir = os.path.expanduser(source_dir)
+        target_dir = os.path.expanduser(target_dir)
+
+        # Create target directory if it doesn't exist, make pattern to find wavs via glob match
+        os.makedirs(target_dir, exist_ok=True)
+        pattern = os.path.join(source_dir, f"*.{extension}")
+        matching_files = glob.glob(pattern, recursive=False)
+
+        # Add each file to a list
+        available_wavs = [f for f in glob.glob(pattern) if os.path.isfile(f)]
+
+        # Copy each file to target directory
+        for file_path in matching_files:
+            if os.path.isfile(file_path):
+                filename = os.path.basename(file_path)
+                target_path = os.path.join(target_dir, filename)
+                shutil.copy2(file_path, target_path)
+
+        return available_wavs
+
+    def process_one_clip_to_add(clip, start_time, loop_val, loud_val, ptch_spd_val, gensr=44100, max_len=10):
+        max_len = gensr * max_len
+        print('NEXT FILE____________________________')
+        sr, d = wavfile.read(clip)
+        if len(d.shape) > 1:
+            d = d.mean(axis=1)
+        if np.max(np.abs(d)) != 0:
+            d = d / np.max(np.abs(d))
+        print('The raw sampling rate and length are: ', sr, len(d))
+        if sr != 44100:
+            ratio = 44100 / sr
+            d = signal.resample(d, int(len(d) * ratio))
+            sr = 44100
+        sr_looped, d_looped = loop(sr, d, loop_val)
+        print('Length of looped file: ', len(d_looped))
+        sr_loop_amp, d_loop_amp = loud(sr_looped, d_looped, loud_val)
+        sr_loop_amp_ps, d_loop_amp_ps = pitch_speed(sr_loop_amp, d_loop_amp, ptch_spd_val)
+        sr = sr_loop_amp_ps
+        d = d_loop_amp_ps
+        start_chunk_len = start_time * sr
+        strt_zero_chunk = np.zeros(start_chunk_len)
+        padded_d = np.concatenate((strt_zero_chunk, d))
+        if len(padded_d) > 2646000:
+            d = padded_d[:2646000]
+        elif len(padded_d) < 2646000:
+            d = np.append(padded_d, np.zeros(2646000 - len(padded_d)))
+        else:
+            d = padded_d
+        return (sr, d)
+
+    def loop(sr, d, num_loops):
+        d_looped = np.tile(d, num_loops)
+        sr_looped = sr
+        return (sr_looped, d_looped)
+
+    def loud(sr, d, loud_val):
+        d_amp = d * loud_val
+        sr_amp = sr
+        return (sr_amp, d_amp)
+
+    def pitch_speed(sr, d, factor):
+        num_samples = int(len(d) / factor)
+        y_pitched = resample(d, num_samples)
+        sr_pitched = sr
+        return (sr_pitched, y_pitched)
+    return process_one_clip_to_add, pull_available_wavs
+
+
+@app.cell
+def _(np, plt, process_one_clip_to_add, wavfile):
+    def combine_clips(base_song, clips_to_add):
+        sr_base, d_base = wavfile.read(base_song)
+        plt.figure(figsize=(10, 4))
+        plt.plot(np.arange(0, len(d_base)) / sr_base, d_base, 'b')
+        srs, ds, combined_sounds = ([], [], d_base)
+        for index, row in clips_to_add.iterrows():
+            sr, d = process_one_clip_to_add(row['clip'], row['start_time'], row['loops'], row['loudness'], row['pitch_speed'])
+            srs.append(sr)
+            ds.append(d)
+            plt.plot(np.arange(0, len(d)) / sr, d - 1.5 * index, 'r')
+            combined_sounds += d
+        (plt.xlabel('Time (s)'), plt.ylabel('Amplitude'))
+        plt.title('My Song!')
+        plt.grid(True, alpha=0.3)
+        wavfile.write('my_final_song.wav', sr_base, np.array(combined_sounds, dtype=np.float32))
+        return
+    return
+
+
+@app.cell
+def _(pull_available_wavs):
+    avail_wavs = pull_available_wavs("~/ohw25_proj_RiptideRemix/data/template_sounds", "~/ohw25_proj_RiptideRemix/contributor_folders/isabelle/audio_processing_mixers/available_wavs", "wav")
+    return (avail_wavs,)
+
+
+@app.cell
+def _(np, wavfile):
+    sample_rate = 44100
+    duration = 10
+    empty_audio = np.zeros(int(sample_rate * duration), dtype=np.float32)
+
+    wavfile.write('my_song.wav', sample_rate, empty_audio)
+    print("The original empty song file is length: ", len(empty_audio))
+    return
+
+
+@app.cell
+def _(avail_wavs, ipd, np, plt, wavfile):
+    sr, d = wavfile.read(avail_wavs[1])
+    plt.figure(figsize=(10, 4))
+    plt.plot(np.arange(0, len(d)) / sr, d, 'b')
+    ipd.Audio(avail_wavs[0])
+    return
+
+
+@app.cell
+def _(avail_wavs, np, wavfile):
+    ## SELECT YOUR CLIP:
+    audio_selected = avail_wavs[4]
+    sr, d = wavfile.read(audio_selected)
+    d = d / np.max(np.abs(d))
+    return (audio_selected,)
+
+
+@app.cell
+def _(audio_selected, clips_to_add, loops, loudness, ptch_spd, start_time):
+    clips_to_add.loc[len(clips_to_add)] = [audio_selected, start_time, loops, loudness, ptch_spd]
+    print(clips_to_add)
+    for index, clip in enumerate(clips_to_add['clip']):
+        print(clip.split("temp", 1)[-1])
     return
 
 
