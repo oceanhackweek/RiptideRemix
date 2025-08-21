@@ -355,6 +355,12 @@ def _(mo):
 
 @app.cell(column=3)
 def _(mo):
+    mo.md(r"""## Clip Editor""")
+    return
+
+
+@app.cell
+def _(mo):
     slider_t = mo.ui.slider(1.0, 60.0, label='Time in Song (s)')
     slider_t
     return
