@@ -95,30 +95,12 @@ def _(basePath, mo):
     mo.image(
         src= basePath / "Images" / "welcome.png",
         alt="placeholder",
-        width=75,
-        height=75,
+        width=115,
+        height=115,
         rounded=False,
         caption=""
     )
     return
-
-
-@app.cell
-def _(basePath, mo):
-    file_browser = mo.ui.file_browser(
-        initial_path= basePath / "data", multiple=True)
-    return
-
-
-@app.cell
-def _():
-    boxes = [
-        (5, 10, 1000, 3000, "seismic"),
-        (15, 25, 5000, 7000, "whale"),
-        (30, 40, 12000, 15000, "seismic"),
-        (42, 50, 2000, 6000, "whale"),
-    ]
-    return (boxes,)
 
 
 @app.cell
@@ -159,36 +141,30 @@ def _(mo):
 
 @app.cell(column=1)
 def _(mo):
-    gather_button = mo.ui.button(
-        value=0, on_click=lambda value: value + 1, label="Gather Data", kind='neutral'
-    )
-    gather_button
-    return
-
-
-@app.cell
-def _(mo):
+    import webbrowser
     mix_button = mo.ui.button(
-        value=0, on_click=lambda value: value + 1, label="Mix Sounds", kind='neutral'
-    )
+            label="Mix Sounds",
+            kind='neutral',
+            on_click=lambda _: webbrowser.open("http://10.19.147.127:8000/", new=0)  # URL for Mixer page
+        )
     mix_button
-    return
+    return (webbrowser,)
 
 
 @app.cell
-def _(mo):
-    educate_button = mo.ui.button(
-        value=0, on_click=lambda value: value + 1, label="Learn More", kind='neutral'
-    )
+def _(mo, webbrowser):
+    educate_button = mo.ui.button( label="Learn More", kind='neutral', on_click=lambda _: webbrowser.open("http://10.19.147.127:8000/learn", new=0))  # URL for Learn More
     educate_button
     return
 
 
 @app.cell
-def _(mo):
+def _(mo, webbrowser):
     about_button = mo.ui.button(
-        value=0, on_click=lambda value: value + 1, label="About the Team", kind='neutral'
-    )
+            label="About the Team",
+            kind='neutral',
+            on_click=lambda _: webbrowser.open("http://10.19.147.127:8000/about", new=0)  # URL for About
+        )
     about_button
     return
 
@@ -203,9 +179,15 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-    Ahoy, explorer! Here lies a treasure chest of the sea’s secrets. Drift through our collection and discover glaciers groaning, icebergs cracking, whales singing their hearts out, and even the occasional mischievous crocodile.
+    Ahoy, explorer! Here lies a treasure chest of the sea’s secrets. Drift through our collection and discover glaciers groaning, icebergs cracking, whales singing their hearts out, and even the occasional mischievous crocodile. Each clip is yours to play with:
 
-    Click “Explore this sound” to dive deeper into any recording and uncover the stories hidden in the waves.
+    * Speed it up to make it race like a storm or slow it down to let it drift like a lazy current.
+
+    * Shift the frequency to soar into the skies or rumble in the deep.
+
+    * Adjust the amplitude to make it whisper or roar.
+
+    Experiment freely—the ocean has endless voices, and now they’re in your hands. When you’ve crafted the sound just the way you like, click “Add to Song” to weave it into your grand ocean symphony.
     """
     )
     return
@@ -213,14 +195,8 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    soundclass_dropdown = mo.ui.dropdown(options={'Anthropogenic': 1, 'Cetacean Call': 2, 'Seismic Event': 3})
-    return (soundclass_dropdown,)
-
-
-@app.cell
-def _(soundclass_dropdown):
-    soundclass_dropdown
-    return
+    category_dropdown = mo.ui.dropdown(options={'Seismic Event': 1, 'Cetacean Call': 2, 'Anthropogenic': 3, 'Other': 3}, value = 'Cetacean Call')
+    return (category_dropdown,)
 
 
 @app.cell
@@ -243,13 +219,7 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    mo.md(r"""Subclass/Network:""")
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(r"""Station:""")
+    mo.md(r"""Subclass:""")
     return
 
 
@@ -260,13 +230,19 @@ def _(mo):
 
 
 @app.cell
-def _(mo, soundclass_dropdown):
-    if soundclass_dropdown.selected_key == 'Seismic Event':
-        labelopts = {'Japan 2011': 1, 'Alaska 2021': 2, 'Russia 2025': 3, 'Misc': 4}
-    elif soundclass_dropdown.selected_key == 'Cetacean Call':
+def _(category_dropdown):
+    category_dropdown
+    return
+
+
+@app.cell
+def _(category_dropdown, mo):
+    if category_dropdown.selected_key == 'Seismic Event':
+        labelopts = {'Japan2011': 1, 'Alaska2021': 2, 'Russia2025': 3}
+    elif category_dropdown.selected_key == 'Cetacean Call':
         labelopts = {'Mysticetes': 1, 'Odontocetes': 2} # replace with available_wavs/cetacean
     else:
-        labelopts = {} # replace with available_wavs/other
+        labelopts = {"All": 1} # replace with available_wavs/other
 
     class_dropdown = mo.ui.dropdown(options=labelopts)
     class_dropdown
@@ -274,33 +250,35 @@ def _(mo, soundclass_dropdown):
 
 
 @app.cell
-def _(class_dropdown, mo, soundclass_dropdown):
-    if soundclass_dropdown.selected_key == 'Seismic Event':
-        labelopts_sc = {}
-    elif soundclass_dropdown.selected_key == 'Cetacean Call' and class_dropdown.selected_key == 'Mysticetes':
-        labelopts_sc = {'Bowhead whale': 1, 'Humpback whale': 2}
-    elif soundclass_dropdown.selected_key == 'Cetacean Call' and class_dropdown.selected_key == 'Odontocetes':
-        labelopts_sc = {'Orca': 1, 'Sperm whale': 2}
-    elif soundclass_dropdown.selected_key == 'Other':
-        labelopts_sc = {}
+def _(basePath, category_dropdown, class_dropdown, mo, os):
+    if category_dropdown.selected_key == 'Cetacean Call':
+        sc_path = basePath / "Library" / "Cetacean" / class_dropdown.selected_key
+        sc_list = os.listdir(sc_path)
+        sc_dict = {sc_list[i]: i for i in range(len(sc_list))}
+    elif category_dropdown.selected_key == 'Seismic Event':
+        sc_dict = {"All"}
     else:
-        labelopts_sc = {'Beans': 1, 'Toast': 2}
-
-    subclass_dropdown = mo.ui.dropdown(options=labelopts_sc)
-    subclass_dropdown
-    return (subclass_dropdown,)
+        sc_dict = {"All"}
+    sc_dropdown = mo.ui.dropdown(options=sc_dict)
+    return (sc_dropdown,)
 
 
 @app.cell
-def _(class_dropdown, os, soundclass_dropdown, subclass_dropdown):
-    if soundclass_dropdown.selected_key == 'Cetacean Call':
-        clips_path = os.path.join('ohw25_proj_RiptideRemix', 'Library', 'Cetacean', class_dropdown.selected_key, subclass_dropdown.selected_key)
+def _(sc_dropdown):
+    sc_dropdown
+    return
+
+
+@app.cell
+def _(basePath, category_dropdown, class_dropdown, os, sc_dropdown):
+    if category_dropdown.selected_key == 'Cetacean Call':
+        clips_path = basePath / "Library" / "Cetacean" / class_dropdown.selected_key / sc_dropdown.selected_key
         clip_list = os.listdir(clips_path)
-    elif soundclass_dropdown.selected_key == 'Seismic Event':
-        clips_path = os.path.join('ohw25_proj_RiptideRemix', 'Library', 'Seismic', class_dropdown.selected_key)
+    elif category_dropdown.selected_key == 'Seismic Event':
+        clips_path = basePath / "Library" / "Seismic" / class_dropdown.selected_key
         clip_list = os.listdir(clips_path)
     else:
-        clips_path = os.path.join('ohw25_proj_RiptideRemix', 'Library', soundclass_dropdown.selected_key)
+        clips_path = basePath / "Library" / class_dropdown.selected_key
         clip_list = os.listdir(clips_path)
     return clip_list, clips_path
 
@@ -396,7 +374,7 @@ def _(np, plt):
         Sxx_dB = 10 * np.log10(Sxx + 1e-10)
 
         # Create figure and plot
-        fig, ax = plt.subplots(figsize=(10, 4))
+        fig, ax = plt.subplots(figsize=(10, 3))
         pcm = ax.pcolormesh( time_segments, frequencies, Sxx_dB, shading="gouraud", cmap="viridis", vmin=-99)
         fig.colorbar(pcm, ax=ax, label="Intensity [dB]")
         ax.set_ylabel("Frequency [Hz]")
@@ -409,8 +387,8 @@ def _(np, plt):
 
 
 @app.cell
-def _(plot_spectrogram, sample_rates, signal2):
-    fig2 = plot_spectrogram(signal2, sample_rates)
+def _(d_selected, plot_spectrogram, sr_selected):
+    fig2 = plot_spectrogram(d_selected, sr_selected)
     fig2
     return
 
@@ -475,17 +453,9 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    # should be loops slider
-    editor_loop = mo.ui.checkbox(label="TODO use or delete this")
-    editor_loop
-    return
-
-
-@app.cell
-def _(mo):
     # a button that when clicked will have its value set to True;
     # any cells referencing that button will automatically run.
-    button_addclip = mo.ui.run_button(label='Update')
+    button_addclip = mo.ui.run_button(label='Add Clip')
     button_addclip
     return (button_addclip,)
 
@@ -517,24 +487,6 @@ def _(
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-    Here’s where the fun begins. Each clip is yours to play with:
-
-    * Speed it up to make it race like a storm or slow it down to let it drift like a lazy current.
-
-    * Shift the frequency to soar into the skies or rumble in the deep.
-
-    * Adjust the amplitude to make it whisper or roar.
-
-    Experiment freely—the ocean has endless voices, and now they’re in your hands. When you’ve crafted the sound just the way you like, click “Add to Song” to weave it into your grand ocean symphony.
-    """
-    )
-    return
-
-
-@app.cell
-def _(mo):
     mo.md(r"""### Acoustic Modifiers""")
     return
 
@@ -546,7 +498,7 @@ def _():
 
 @app.cell(column=4)
 def _(mo):
-    mo.md(r"""## MIXER""")
+    mo.md(r"""##FINAL SONG""")
     return
 
 
@@ -558,27 +510,8 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    mo.md(r"""### Waveform:""")
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""### Spectrogram:""")
-    return
-
-
-@app.cell
-def _(mo):
     button_mixerplay = mo.ui.run_button(label='Play')
     button_mixerplay
-    return
-
-
-@app.cell
-def _(mo):
-    mixer_loop = mo.ui.checkbox(label="Loop audio")
-    mixer_loop
     return
 
 
