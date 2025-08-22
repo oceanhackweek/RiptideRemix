@@ -420,7 +420,13 @@ def _(
 ):
     import warnings
     warnings.simplefilter("ignore")
-    plot_event_station_map(event_lat, event_lon, station_lat, station_lon, station_info)
+    fig4 = plot_event_station_map(event_lat, event_lon, station_lat, station_lon, station_info)
+    return (fig4,)
+
+
+@app.cell
+def _(fig4):
+    fig4
     return
 
 
@@ -589,7 +595,7 @@ def _(ccrs, cfeature, plt):
         ax.gridlines(draw_labels=True, linestyle='--')
         ax.legend(loc='upper right', fontsize=10)
         plt.tight_layout()
-        plt.show()
+        return fig
     return (plot_event_station_map,)
 
 
