@@ -216,6 +216,8 @@ def _(category_dropdown, mo):
         labelopts = {'Japan2011': 1, 'Alaska2021': 2, 'Russia2025': 3}
     elif category_dropdown.selected_key == 'Cetacean Call':
         labelopts = {'Mysticetes': 1, 'Odontocetes': 2} # replace with available_wavs/cetacean
+    elif category_dropdown.selected_key == 'Anthropogenic':
+        labelopts = {"All": 1}
     else:
         labelopts = {"All": 1} # replace with available_wavs/other
 
@@ -231,9 +233,9 @@ def _(basePath, category_dropdown, class_dropdown, mo, os):
         sc_list = os.listdir(sc_path)
         sc_dict = {sc_list[i]: i for i in range(len(sc_list))}
     elif category_dropdown.selected_key == 'Seismic Event':
-        sc_dict = {"All"}
+        sc_dict = {"All": 1}
     else:
-        sc_dict = {"All"}
+        sc_dict = {"All": 1}
     sc_dropdown = mo.ui.dropdown(options=sc_dict)
     return (sc_dropdown,)
 
@@ -252,8 +254,11 @@ def _(basePath, category_dropdown, class_dropdown, os, sc_dropdown):
     elif category_dropdown.selected_key == 'Seismic Event':
         clips_path = basePath / "Library" / "Seismic" / class_dropdown.selected_key
         clip_list = os.listdir(clips_path)
+    elif category_dropdown.selected_key == 'Anthropogenic':
+        clips_path = basePath / "Library" / "Anthropogenic" 
+        clip_list = os.listdir(clips_path)
     else:
-        clips_path = basePath / "Library" / class_dropdown.selected_key
+        clips_path = basePath / "Library" / "Other"
         clip_list = os.listdir(clips_path)
     return clip_list, clips_path
 
@@ -562,7 +567,7 @@ def _(clips_to_add, np, plt, spectrogram, wavfile):
 @app.cell
 def _(mo):
     # Play full mix
-    button_play_mix = mo.ui.run_button(label="View Full Mix")
+    button_play_mix = mo.ui.run_button(label="Hear Full Mix")
     button_play_mix
     return (button_play_mix,)
 
@@ -582,8 +587,8 @@ def _(basePath, mo):
     mo.image(
         src= basePath / "Images" / "bunda-feia-cute.gif",
         alt="placeholder",
-        width=200,
-        height=200,
+        width=300,
+        height=300,
         rounded=True,
         caption=""
     )
