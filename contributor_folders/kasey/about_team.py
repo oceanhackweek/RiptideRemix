@@ -103,7 +103,7 @@ def _(basePath, mo):
 @app.cell
 def _(basePath, mo):
     mo.image(
-        src= basePath / "Images" / "Folks" / "oluwatofunmi.jpeg",
+        src= basePath / "Images" / "Folks" / "oluwatofunmi.jpg",
         alt="placeholder",
         width=175,
         height=200,
@@ -241,36 +241,13 @@ def _(mo):
 
 @app.cell(column=1)
 def _(mo):
-    import webbrowser
-
-    mix_button = mo.ui.button(
-        label="Mix Sounds",
-        kind='neutral',
-        on_click=lambda _: webbrowser.open("/", new=0)  # URL for Mixer page
-    )
-    mix_button
-    return (webbrowser,)
-
-
-@app.cell
-def _(mo, webbrowser):
-    educate_button = mo.ui.button(
-        label="Learn More",
-        kind='neutral',
-        on_click=lambda _: webbrowser.open("/learn", new=0)  # URL for Learn More
-    )
-    educate_button
-    return
-
-
-@app.cell
-def _(mo, webbrowser):
-    about_button = mo.ui.button(
-        label="About the Team",
-        kind='neutral',
-        on_click=lambda _: webbrowser.open("/about", new=0)  # URL for About
-    )
-    about_button
+    nav_menu = mo.nav_menu({
+        "/": "Mix Sounds",  # internal
+        "/learn": "Learn More",  # internal
+        "/about": "About the Team",  # internal
+        "/quake": "Gather More Data"
+    })
+    nav_menu
     return
 
 

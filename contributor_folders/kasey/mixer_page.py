@@ -58,7 +58,7 @@ def _(basePath, mo):
     mo.image(
         src= basePath / "Images" /  "ArtGifs" / "placeholder.gif",
         alt="placeholder",
-        width=1200,
+        width=900,
         height=200,
         rounded=False,
         caption=""
@@ -84,41 +84,17 @@ def _(mo):
     return
 
 
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""asdf""")
-    return
-
-
 @app.cell
 def _(basePath, mo):
     mo.image(
         src= basePath / "Images" / "welcome.png",
         alt="placeholder",
-        width=75,
-        height=75,
+        width=115,
+        height=115,
         rounded=False,
         caption=""
     )
     return
-
-
-@app.cell
-def _(basePath, mo):
-    file_browser = mo.ui.file_browser(
-        initial_path= basePath / "data", multiple=True)
-    return
-
-
-@app.cell
-def _():
-    boxes = [
-        (5, 10, 1000, 3000, "seismic"),
-        (15, 25, 5000, 7000, "whale"),
-        (30, 40, 12000, 15000, "seismic"),
-        (42, 50, 2000, 6000, "whale"),
-    ]
-    return (boxes,)
 
 
 @app.cell
@@ -159,37 +135,13 @@ def _(mo):
 
 @app.cell(column=1)
 def _(mo):
-    gather_button = mo.ui.button(
-        value=0, on_click=lambda value: value + 1, label="Gather Data", kind='neutral'
-    )
-    gather_button
-    return
-
-
-@app.cell
-def _(mo):
-    mix_button = mo.ui.button(
-        value=0, on_click=lambda value: value + 1, label="Mix Sounds", kind='neutral'
-    )
-    mix_button
-    return
-
-
-@app.cell
-def _(mo):
-    educate_button = mo.ui.button(
-        value=0, on_click=lambda value: value + 1, label="Learn More", kind='neutral'
-    )
-    educate_button
-    return
-
-
-@app.cell
-def _(mo):
-    about_button = mo.ui.button(
-        value=0, on_click=lambda value: value + 1, label="About the Team", kind='neutral'
-    )
-    about_button
+    nav_menu = mo.nav_menu({
+        "/": "Mix Sounds",  # internal
+        "/learn": "Learn More",  # internal
+        "/about": "About the Team",  # internal
+        "/quake": "Gather More Data"
+    })
+    nav_menu
     return
 
 
@@ -203,9 +155,15 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-    Ahoy, explorer! Here lies a treasure chest of the sea’s secrets. Drift through our collection and discover glaciers groaning, icebergs cracking, whales singing their hearts out, and even the occasional mischievous crocodile.
+    Ahoy, explorer! Here lies a treasure chest of the sea’s secrets. Drift through our collection and discover glaciers groaning, icebergs cracking, whales singing their hearts out, and even the occasional mischievous crocodile. Each clip is yours to play with:
 
-    Click “Explore this sound” to dive deeper into any recording and uncover the stories hidden in the waves.
+    * Speed it up to make it race like a storm or slow it down to let it drift like a lazy current.
+
+    * Shift the frequency to soar into the skies or rumble in the deep.
+
+    * Adjust the amplitude to make it whisper or roar.
+
+    Experiment freely—the ocean has endless voices, and now they’re in your hands. When you’ve crafted the sound just the way you like, click “Add to Song” to weave it into your grand ocean symphony.
     """
     )
     return
@@ -213,14 +171,8 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    soundclass_dropdown = mo.ui.dropdown(options={'Anthropogenic': 1, 'Cetacean Call': 2, 'Seismic Event': 3})
-    return (soundclass_dropdown,)
-
-
-@app.cell
-def _(soundclass_dropdown):
-    soundclass_dropdown
-    return
+    category_dropdown = mo.ui.dropdown(options={'Seismic Event': 1, 'Cetacean Call': 2, 'Anthropogenic': 3, 'Other': 3}, value = 'Cetacean Call')
+    return (category_dropdown,)
 
 
 @app.cell
@@ -243,13 +195,7 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    mo.md(r"""Subclass/Network:""")
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(r"""Station:""")
+    mo.md(r"""Subclass:""")
     return
 
 
@@ -260,13 +206,21 @@ def _(mo):
 
 
 @app.cell
-def _(mo, soundclass_dropdown):
-    if soundclass_dropdown.selected_key == 'Seismic Event':
-        labelopts = {'Japan 2011': 1, 'Alaska 2021': 2, 'Russia 2025': 3, 'Misc': 4}
-    elif soundclass_dropdown.selected_key == 'Cetacean Call':
+def _(category_dropdown):
+    category_dropdown
+    return
+
+
+@app.cell
+def _(category_dropdown, mo):
+    if category_dropdown.selected_key == 'Seismic Event':
+        labelopts = {'Japan2011': 1, 'Alaska2021': 2, 'Russia2025': 3}
+    elif category_dropdown.selected_key == 'Cetacean Call':
         labelopts = {'Mysticetes': 1, 'Odontocetes': 2} # replace with available_wavs/cetacean
+    elif category_dropdown.selected_key == 'Anthropogenic':
+        labelopts = {"All": 1}
     else:
-        labelopts = {} # replace with available_wavs/other
+        labelopts = {"All": 1} # replace with available_wavs/other
 
     class_dropdown = mo.ui.dropdown(options=labelopts)
     class_dropdown
@@ -274,33 +228,38 @@ def _(mo, soundclass_dropdown):
 
 
 @app.cell
-def _(class_dropdown, mo, soundclass_dropdown):
-    if soundclass_dropdown.selected_key == 'Seismic Event':
-        labelopts_sc = {}
-    elif soundclass_dropdown.selected_key == 'Cetacean Call' and class_dropdown.selected_key == 'Mysticetes':
-        labelopts_sc = {'Bowhead whale': 1, 'Humpback whale': 2}
-    elif soundclass_dropdown.selected_key == 'Cetacean Call' and class_dropdown.selected_key == 'Odontocetes':
-        labelopts_sc = {'Orca': 1, 'Sperm whale': 2}
-    elif soundclass_dropdown.selected_key == 'Other':
-        labelopts_sc = {}
+def _(basePath, category_dropdown, class_dropdown, mo, os):
+    if category_dropdown.selected_key == 'Cetacean Call':
+        sc_path = basePath / "Library" / "Cetacean" / class_dropdown.selected_key
+        sc_list = os.listdir(sc_path)
+        sc_dict = {sc_list[i]: i for i in range(len(sc_list))}
+    elif category_dropdown.selected_key == 'Seismic Event':
+        sc_dict = {"All": 1}
     else:
-        labelopts_sc = {'Beans': 1, 'Toast': 2}
-
-    subclass_dropdown = mo.ui.dropdown(options=labelopts_sc)
-    subclass_dropdown
-    return (subclass_dropdown,)
+        sc_dict = {"All": 1}
+    sc_dropdown = mo.ui.dropdown(options=sc_dict)
+    return (sc_dropdown,)
 
 
 @app.cell
-def _(class_dropdown, os, soundclass_dropdown, subclass_dropdown):
-    if soundclass_dropdown.selected_key == 'Cetacean Call':
-        clips_path = os.path.join('ohw25_proj_RiptideRemix', 'Library', 'Cetacean', class_dropdown.selected_key, subclass_dropdown.selected_key)
+def _(sc_dropdown):
+    sc_dropdown
+    return
+
+
+@app.cell
+def _(basePath, category_dropdown, class_dropdown, os, sc_dropdown):
+    if category_dropdown.selected_key == 'Cetacean Call':
+        clips_path = basePath / "Library" / "Cetacean" / class_dropdown.selected_key / sc_dropdown.selected_key
         clip_list = os.listdir(clips_path)
-    elif soundclass_dropdown.selected_key == 'Seismic Event':
-        clips_path = os.path.join('ohw25_proj_RiptideRemix', 'Library', 'Seismic', class_dropdown.selected_key)
+    elif category_dropdown.selected_key == 'Seismic Event':
+        clips_path = basePath / "Library" / "Seismic" / class_dropdown.selected_key
+        clip_list = os.listdir(clips_path)
+    elif category_dropdown.selected_key == 'Anthropogenic':
+        clips_path = basePath / "Library" / "Anthropogenic" 
         clip_list = os.listdir(clips_path)
     else:
-        clips_path = os.path.join('ohw25_proj_RiptideRemix', 'Library', soundclass_dropdown.selected_key)
+        clips_path = basePath / "Library" / "Other"
         clip_list = os.listdir(clips_path)
     return clip_list, clips_path
 
@@ -316,12 +275,50 @@ def _(clip_list, mo):
 @app.cell
 def _(clip_dropdown, clips_path, os):
     selected_audio = os.path.join(clips_path, clip_dropdown.selected_key)
-    return (selected_audio,)
+    return
 
 
 @app.cell
-def _(ipd, selected_audio):
-    ipd.Audio(selected_audio)
+def _(mo):
+    button_preview = mo.ui.run_button(label="Update preview")
+    button_preview
+    return (button_preview,)
+
+
+@app.cell
+def _(
+    audio_selected,
+    button_preview,
+    ipd,
+    np,
+    process_one_clip_to_add,
+    slider_amp,
+    slider_loops,
+    slider_pitch,
+    slider_speed,
+    slider_t,
+):
+    if button_preview.value and audio_selected:
+        print(
+            audio_selected,
+            slider_t.value,
+            slider_loops.value,
+            slider_amp.value,
+            slider_pitch.value,
+            slider_speed.value
+        )
+        sr_clip, d_clip = process_one_clip_to_add(
+            audio_selected,
+            slider_t.value,
+            slider_loops.value,
+            slider_amp.value,
+            slider_pitch.value,
+            slider_speed.value
+        )
+        if np.max(np.abs(d_clip)) > 0:
+            d_clip = d_clip / np.max(np.abs(d_clip))
+
+        ipd.display(ipd.Audio(data=d_clip, rate=sr_clip))
     return
 
 
@@ -335,90 +332,15 @@ def _():
 
 
 @app.cell
-def _(mo):
-    library_loop = mo.ui.checkbox(label="Loop audio")
-    library_loop
+def _(d_final, plot_waveform, sr_resampled):
+    fig = plot_waveform(d_final, sr_resampled)
+    fig
     return
 
 
 @app.cell
-def _():
-    import numpy as np
-    import matplotlib.pyplot as plt
-
-    def plot_waveform(audio_data, sr):
-        # Handle stereo: take first channel if needed
-        if audio_data.ndim > 1:
-            audio_data = audio_data[:, 0]
-
-        # Normalize amplitude to [-1, 1]
-        audio_data = audio_data.astype(np.float32)
-        audio_data /= np.max(np.abs(audio_data))
-
-        # Time axis in seconds
-        duration = len(audio_data) / sr
-        times = np.linspace(0, duration, len(audio_data))
-
-        # Create the figure
-        fig, ax = plt.subplots(figsize=(10, 3))
-        ax.plot(times, audio_data, color="steelblue", linewidth = 0.2)
-        ax.set_xlim(0, duration)
-        ax.set_ylim(-1.1, 1.1)
-        ax.set_xlabel("Time [s]")
-        ax.set_ylabel("Amplitude")
-        ax.grid(alpha=0.3)
-        plt.tight_layout()
-
-        # For Marimo / Jupyter, returning fig allows inline display
-        return fig
-    return np, plot_waveform, plt
-
-
-@app.cell
-def _(duration, np, plot_waveform, sample_rate):
-    sample_rates=16000
-    duation = 3
-    t = np.linspace(0, duration, int(sample_rate * duration), endpoint=False)
-
-    # Two sine waves at 440 Hz (A4) and 880 Hz (A5)
-    freq1 = 1
-    signal2 = np.sin(1/freq1 * t)
-
-    fig = plot_waveform(signal2, sample_rates)
-    fig
-    return sample_rates, signal2
-
-
-@app.cell
-def _(np, plt):
-    from scipy.signal import spectrogram
-
-    def plot_spectrogram(audio_data, sr):
-        if audio_data.ndim > 1:
-            audio_data = audio_data[:, 0]
-
-        # Compute spectrogram
-        frequencies, time_segments, Sxx = spectrogram( audio_data, fs=sr, nperseg=1024, noverlap=256, scaling="spectrum")
-
-        # Convert power to dB
-        Sxx_dB = 10 * np.log10(Sxx + 1e-10)
-
-        # Create figure and plot
-        fig, ax = plt.subplots(figsize=(10, 4))
-        pcm = ax.pcolormesh( time_segments, frequencies, Sxx_dB, shading="gouraud", cmap="viridis", vmin=-99)
-        fig.colorbar(pcm, ax=ax, label="Intensity [dB]")
-        ax.set_ylabel("Frequency [Hz]")
-        ax.set_xlabel("Time [s]")
-        ax.set_ylim(0, sr / 2)
-        plt.tight_layout()
-
-        return fig
-    return (plot_spectrogram,)
-
-
-@app.cell
-def _(plot_spectrogram, sample_rates, signal2):
-    fig2 = plot_spectrogram(signal2, sample_rates)
+def _(d_final, plot_spectrogram, sr_selected):
+    fig2 = plot_spectrogram(d_final, sr_selected)
     fig2
     return
 
@@ -444,7 +366,7 @@ def _(slider_amp, slider_loops, slider_pitch, slider_speed, slider_t):
 @app.cell
 def _(mo):
     # start time
-    slider_t = mo.ui.slider(0, 30.0, label='Time in Song (s)')
+    slider_t = mo.ui.slider(0, 20.0, label='Time in Song (s)')
     slider_t 
     return (slider_t,)
 
@@ -483,61 +405,33 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    # should be loops slider
-    editor_loop = mo.ui.checkbox(label="TODO use or delete this")
-    editor_loop
-    return
-
-
-@app.cell
-def _(mo):
-    # a button that when clicked will have its value set to True;
-    # any cells referencing that button will automatically run.
-    button_addclip = mo.ui.run_button(label='Update')
-    button_addclip
-    return (button_addclip,)
+    # Add to mix
+    button_add_clip = mo.ui.run_button(label="Add Clip")
+    button_add_clip
+    return (button_add_clip,)
 
 
 @app.cell
 def _(
     audio_selected,
-    button_addclip,
+    button_add_clip,
     clips_to_add,
-    ipd,
-    loops,
-    loudness,
-    np,
-    process_one_clip_to_add,
-    ptch,
-    spd,
-    start_time,
-    wavfile,
+    slider_amp,
+    slider_loops,
+    slider_pitch,
+    slider_speed,
+    slider_t,
 ):
-    if button_addclip.value:
-        print('ADDING A CLIP!!!')
-        clips_to_add.loc[len(clips_to_add)] = [audio_selected, start_time, loops, loudness, ptch, spd]
-        temp_sr, temp_d = process_one_clip_to_add(audio_selected, start_time, loops, loudness, ptch, spd)
-        wavfile.write('temp_clip.wav', temp_sr, np.array(temp_d, dtype=np.float32))
-        ipd.Audio('temp_clip.wav')
-
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(
-        r"""
-    Here’s where the fun begins. Each clip is yours to play with:
-
-    * Speed it up to make it race like a storm or slow it down to let it drift like a lazy current.
-
-    * Shift the frequency to soar into the skies or rumble in the deep.
-
-    * Adjust the amplitude to make it whisper or roar.
-
-    Experiment freely—the ocean has endless voices, and now they’re in your hands. When you’ve crafted the sound just the way you like, click “Add to Song” to weave it into your grand ocean symphony.
-    """
-    )
+    if button_add_clip.value and audio_selected:
+        clips_to_add.loc[len(clips_to_add)] = [
+            audio_selected,
+            slider_t.value,
+            slider_loops.value,
+            slider_amp.value,
+            slider_pitch.value,
+            slider_speed.value
+        ]
+        print(f"Added clip to mix: {audio_selected}")
     return
 
 
@@ -548,13 +442,18 @@ def _(mo):
 
 
 @app.cell
-def _():
+def _(build_mix_array, button_play_mix, clips_to_add, ipd):
+    if button_play_mix.value and len(clips_to_add) > 0:
+        sr_mix, mix_data_array = build_mix_array(clips_to_add)
+        clips_to_add.drop(clips_to_add.index, inplace=True)
+        clips_to_add.reset_index(drop=True, inplace=True)
+        ipd.display(ipd.Audio(mix_data_array, rate=sr_mix))
     return
 
 
 @app.cell(column=4)
 def _(mo):
-    mo.md(r"""## MIXER""")
+    mo.md(r"""##FINAL SONG""")
     return
 
 
@@ -566,111 +465,135 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    mo.md(r"""### Waveform:""")
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""### Spectrogram:""")
-    return
-
-
-@app.cell
-def _(mo):
-    button_mixerplay = mo.ui.run_button(label='Play')
-    button_mixerplay
-    return
-
-
-@app.cell
-def _(mo):
-    mixer_loop = mo.ui.checkbox(label="Loop audio")
-    mixer_loop
-    return
-
-
-@app.cell
-def _(mo):
     # a button that when clicked will have its value set to True;
     # any cells referencing that button will automatically run.
     button_export = mo.ui.run_button(label='Export file')
     button_export
-    return
+    return (button_export,)
 
 
 @app.cell
-def _(boxes, plot_time_freq_boxes):
-    fig3 = plot_time_freq_boxes(boxes)
+def _(clips_to_add, np, plt, wavfile):
+    def plot_clips(clips_to_add):
+        fig, ax = plt.subplots(figsize=(12, 3))
+        num_clips = len(clips_to_add)
+
+        if num_clips == 0:
+            ax.set_title("Your New Song (Nothing Added Yet)")
+            ax.set_xlabel("Time [s]")
+            ax.set_ylabel("Amplitude")
+            ax.set_xticks([])
+            ax.set_yticks([])
+            return fig
+        colors = plt.cm.tab10(np.linspace(0, 1, num_clips))  # distinct colors
+
+        for i, (idx, row) in enumerate(clips_to_add.iterrows()):
+            clip_path = row[0]  # Assuming first column is audio file path
+            sr, data = wavfile.read(clip_path)
+
+            # Convert stereo -> mono if needed
+            if len(data.shape) > 1:
+                data = data.mean(axis=1)
+
+            time = np.arange(len(data)) / sr
+            ax.plot(time, data, color=colors[i], label=f"Clip {i+1}")
+
+        ax.set_title("Your New Song")
+        ax.set_xlabel("Time [s]")
+        ax.set_ylabel("Amplitude")
+        ax.set_xlim(0, 30)
+        ax.legend()
+        ax.grid(alpha=0.3)
+        fig.tight_layout()
+        return fig
+
+    fig3 = plot_clips(clips_to_add)
     fig3
     return
 
 
 @app.cell
-def _(plt):
-    import matplotlib.patches as patches
+def _(clips_to_add, np, plt, spectrogram, wavfile):
+    def plot_combined_spectrogram(clips_to_add):
+        # Handle empty clips case
+        if clips_to_add.empty:
+            fig, ax = plt.subplots(figsize=(10, 3))
+            ax.set_title("Your New Song (Nothing Added Yet)")
+            ax.set_xticks([])
+            ax.set_yticks([])
+            return fig
 
-    def plot_time_freq_boxes(boxes, 
-                             time_range=(0, 60), 
-                             freq_range=(0, 20000)):
-        """
-        Plot time-frequency boxes on a 2D plot with labels and colors.
+        combined_audio = []
+        sr = None
 
-        Parameters
-        ----------
-        boxes : list of tuples
-            Each tuple = (t_start, t_end, f_start, f_end, label)
-        time_range : tuple
-            (min_time, max_time) for x-axis
-        freq_range : tuple
-            (min_freq, max_freq) for y-axis
-        """
-        fig, ax = plt.subplots(figsize=(10, 6))
-        ax.set_facecolor("black")  # black background
+        # Load all clips and concatenate
+        for idx, row in clips_to_add.iterrows():
+            clip_path = row[0]  # Assuming first column is audio path
+            clip_sr, data = wavfile.read(clip_path)
 
-        for (t_start, t_end, f_start, f_end, label) in boxes:
-            # Pick color based on label
-            if label.lower() == "seismic":
-                facecolor = "deeppink"
-                edgecolor = "hotpink"
-            elif label.lower() == "whale":
-                facecolor = "purple"
-                edgecolor = "violet"
-            else:
-                facecolor = "gray"
-                edgecolor = "lightgray"
+            # Handle stereo -> mono
+            if len(data.shape) > 1:
+                data = data.mean(axis=1)
 
-            # Draw box
-            rect = patches.Rectangle(
-                (t_start, f_start), 
-                t_end - t_start, 
-                f_end - f_start,
-                linewidth=1.5, edgecolor=edgecolor, facecolor=facecolor, alpha=0.8
-            )
-            ax.add_patch(rect)
+            # Ensure sample rates are consistent
+            if sr is None:
+                sr = clip_sr
+            elif sr != clip_sr:
+                raise ValueError(f"Sample rate mismatch: expected {sr}, got {clip_sr}")
 
-            # Add label text at the center of the box
-            # ax.text(
-            #     (t_start + t_end) / 2, 
-            #     (f_start + f_end) / 2, 
-            #     label, 
-            #     color="white", ha="center", va="center", fontsize=9, weight="bold"
-            # )
+            combined_audio.append(data)
 
-        # Set limits and labels
-        ax.set_xlim(time_range)
-        ax.set_ylim(freq_range)
-        ax.set_xlabel("Time (s)", color="Purple")
-        ax.set_ylabel("Frequency (Hz)", color="Purple")
-        ax.set_title("MY SONG", color="Purple")
+        # Combine into one array
+        combined_audio = np.concatenate(combined_audio)
 
-        # White ticks
-        ax.tick_params(colors="white")
+        # Compute spectrogram
+        f, t, Sxx = spectrogram(combined_audio, fs=sr, nperseg=1024, noverlap=512)
 
+        # Plot
+        fig, ax = plt.subplots(figsize=(12, 6))
+        im = ax.pcolormesh(t, f, 10 * np.log10(Sxx + 1e-10), shading="auto", cmap="magma")
+        fig.colorbar(im, ax=ax, label="Power (dB)")
+        ax.set_title("Your New Song")
+        ax.set_xlabel("Time [s]")
+        ax.set_ylabel("Frequency [Hz]")
+        ax.set_ylim(0, sr / 2)  # Nyquist limit
+
+        fig.tight_layout()
         return fig
+    fig4 = plot_combined_spectrogram(clips_to_add)
+    fig4
+    return
 
 
-    return (plot_time_freq_boxes,)
+@app.cell
+def _(mo):
+    # Play full mix
+    button_play_mix = mo.ui.run_button(label="Hear Full Mix")
+    button_play_mix
+    return (button_play_mix,)
+
+
+@app.cell
+def _(button_export, clips_to_add, combine_clips, finalwav):
+    if button_export.value:
+        final_wavPath, final_wav = combine_clips(clips_to_add)
+        final_mp3 = finalwav.export_to_mp3(final_wavPath)
+        print("Exported mix to:", final_mp3)
+    return
+
+
+@app.cell
+def _(basePath, mo):
+
+    mo.image(
+        src= basePath / "Images" / "bunda-feia-cute.gif",
+        alt="placeholder",
+        width=300,
+        height=300,
+        rounded=True,
+        caption=""
+    )
+    return
 
 
 @app.cell(column=5)
@@ -736,6 +659,11 @@ def _(mo):
 
 @app.cell
 def _():
+    return
+
+
+@app.cell
+def _():
     import pandas as pd
     import ffmpeg
 
@@ -755,8 +683,109 @@ def _():
 
 
 @app.cell
+def _(np, process_one_clip_to_add):
+    def build_mix_array(mix_clips, sr=44100, duration=30):
+        """
+        Combine all clips in mix_clips into a single audio array.
+        Each row should have: 'clip', 'start_time', 'loops', 'loudness', 'pitch', 'speed'
+        """
+        mix_array = np.zeros(duration * sr, dtype=np.float32)
+
+        for _, row in mix_clips.iterrows():
+            sr_clip, clip_data = process_one_clip_to_add(
+                row['clip'],
+                row['start_time'],
+                row['loops'],
+                row['loudness'],
+                row['pitch'],
+                row['speed'],
+                gen_sr=sr,
+                max_len=duration
+            )
+
+            # Ensure clip fits in the mix
+            if len(clip_data) > len(mix_array):
+                clip_data = clip_data[:len(mix_array)]
+            mix_array[:len(clip_data)] += clip_data
+
+        # Normalize
+        if np.max(np.abs(mix_array)) > 0:
+            mix_array = mix_array / np.max(np.abs(mix_array))
+
+        return sr, mix_array
+    return (build_mix_array,)
+
+
+@app.cell
+def _(np, plt):
+    from scipy.signal import spectrogram
+
+    def plot_spectrogram(audio_data, sr):
+        if audio_data.ndim > 1:
+            audio_data = audio_data[:, 0]
+
+        # Compute spectrogram
+        frequencies, time_segments, Sxx = spectrogram( audio_data, fs=sr, nperseg=1024, noverlap=256, scaling="spectrum")
+
+        # Convert power to dB
+        Sxx_dB = 10 * np.log10(Sxx + 1e-10)
+
+        # Create figure and plot
+        fig, ax = plt.subplots(figsize=(10, 3))
+        pcm = ax.pcolormesh( time_segments, frequencies, Sxx_dB, shading="gouraud", cmap="viridis", vmin=-99)
+        fig.colorbar(pcm, ax=ax, label="Intensity [dB]")
+        ax.set_ylabel("Frequency [Hz]")
+        ax.set_xlabel("Time [s]")
+        ax.set_ylim(0, sr / 2)
+        plt.tight_layout()
+
+        return fig
+    return plot_spectrogram, spectrogram
+
+
+@app.cell
+def _():
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    def plot_waveform(audio_data, sr):
+        # Handle stereo: take first channel if needed
+        if audio_data.ndim > 1:
+            audio_data = audio_data[:, 0]
+
+        # Normalize amplitude to [-1, 1]
+        audio_data = audio_data.astype(np.float32)
+        audio_data /= np.max(np.abs(audio_data))
+
+        # Time axis in seconds
+        duration = len(audio_data) / sr
+        times = np.linspace(0, duration, len(audio_data))
+
+        # Create the figure
+        fig, ax = plt.subplots(figsize=(10, 3))
+        ax.plot(times, audio_data, color="steelblue", linewidth = 0.2)
+        ax.set_xlim(0, duration)
+        ax.set_ylim(-1.1, 1.1)
+        ax.set_xlabel("Time [s]")
+        ax.set_ylabel("Amplitude")
+        ax.grid(alpha=0.3)
+        plt.tight_layout()
+
+        # For Marimo / Jupyter, returning fig allows inline display
+        return fig
+    return np, plot_waveform, plt
+
+
+@app.cell
+def _(basePath, wavfile):
+    workingWavPath = basePath / "data" / "workingwav" / 'mysong.wav'
+    sr_base, d_base = wavfile.read(workingWavPath)
+    return
+
+
+@app.cell
 def _(librosa, np, signal, wavfile):
-    def process_one_clip_to_add(clip, start_time, loop_val, loud_val, ptch_val, spd_val, gen_sr=44100, max_len=60):
+    def process_one_clip_to_add(clip, start_time, loop_val, loud_val, ptch_val, spd_val, gen_sr=44100, max_len=30):
         max_len = gen_sr * max_len
         print("NEXT FILE____________________________")
         sr, d = wavfile.read(clip)
@@ -789,7 +818,7 @@ def _(librosa, np, signal, wavfile):
         d = d_loop_amp_p_s
 
         # Length and start time adjustment
-        start_chunk_len = start_time * sr
+        start_chunk_len = int(start_time * sr)   # <-- Convert to int
         strt_zero_chunk = np.zeros(start_chunk_len)
         padded_d = np.concatenate((strt_zero_chunk, d))
 
@@ -824,31 +853,47 @@ def _(librosa, np, signal, wavfile):
 
 
 @app.cell
-def _(np, plt, process_one_clip_to_add, wavfile):
-    # REMIX
-    def combine_clips(base_song, clips_to_add):
-        sr_base, d_base = wavfile.read(base_song)
-        plt.figure(figsize=(10, 4))
-        plt.plot(np.arange(0, len(d_base)) / sr_base, d_base, 'b')
-        srs, ds, combined_sounds = ([], [], d_base)
-        for index, row in clips_to_add.iterrows():
-            sr, d = process_one_clip_to_add(row['clip'], row['start_time'], row['loops'], row['loudness'], row['pitch_speed'])
-            srs.append(sr)
-            ds.append(d)
-            plt.plot(np.arange(0, len(d)) / sr, d - 1.5 * index, 'r')
-            combined_sounds += d
-        (plt.xlabel('Time (s)'), plt.ylabel('Amplitude'))
-        plt.title('My Song!')
-        plt.grid(True, alpha=0.3)
-        wavfile.write('my_final_song.wav', sr_base, np.array(combined_sounds, dtype=np.float32))
-        return
-    return
+def _(basePath, np, process_one_clip_to_add, wavfile):
+    def combine_clips(clips_to_add, output_wav="my_final_song.wav", sr=44100, duration=60):
+        """
+        Combine all clips from the clips_to_add DataFrame into one overlapping mix.
+        - Each row in clips_to_add contains: clip name, start_time, loops, loudness, pitch, speed
+        - Mix length is fixed by duration (seconds).
+        """
+        owp = basePath / output_wav
+        total_samples = sr * duration
+        final_mix = np.zeros(total_samples, dtype=np.float32)
 
+        for _, row in clips_to_add.iterrows():
+            sr_clip, d_clip = process_one_clip_to_add(
+                row['clip'],
+                row['start_time'],
+                row['loops'],
+                row['loudness'],
+                row['pitch'],
+                row['speed'],
+                gen_sr=sr,
+                max_len=duration
+            )
 
-@app.cell
-def _(clip_list):
-    avail_wavs = clip_list
-    return
+            # Align this clip in time
+            start_sample = int(float(row['start_time']) * sr)
+            end_sample = start_sample + len(d_clip)
+
+            if start_sample < total_samples:
+                # Clip if it runs off the end
+                end_sample = min(end_sample, total_samples)
+                clip_segment = d_clip[:end_sample - start_sample]
+                final_mix[start_sample:end_sample] += clip_segment.astype(np.float32)
+
+        # Normalize to prevent clipping
+        if np.max(np.abs(final_mix)) > 0:
+            final_mix /= np.max(np.abs(final_mix))
+
+        wavfile.write(owp, sr, final_mix)
+        return owp, final_mix
+
+    return (combine_clips,)
 
 
 @app.cell
@@ -862,7 +907,7 @@ def _(np, pd, wavfile):
     wavfile.write('my_song.wav', sample_rate, empty_audio)
     print("The original empty song file is length: ", len(empty_audio))
     print(clips_to_add)
-    return clips_to_add, duration, sample_rate
+    return (clips_to_add,)
 
 
 @app.cell
@@ -872,20 +917,108 @@ def _(clip_dropdown, clips_path, os):
 
 
 @app.cell
-def _(clip_dropdown, clips_path, np, os, wavfile):
+def _(
+    clip_dropdown,
+    clips_path,
+    librosa,
+    loops,
+    loudness,
+    np,
+    os,
+    ptch,
+    signal,
+    spd,
+    wavfile,
+):
     ## SELECT YOUR CLIP:
     audio_selected = os.path.join(clips_path, clip_dropdown.selected_key)
     sr_selected, d_selected = wavfile.read(audio_selected)
     d_selected = d_selected / np.max(np.abs(d_selected))
-    return (audio_selected,)
+
+    # Modify sampling rate to match the file we are building on
+    if sr_selected != 44100:
+        ratio = 44100 /sr_selected
+        d_resampled = signal.resample(d_selected, int(len(d_selected) * ratio))        # Use Fourier method for better quality
+        sr_resampled = 44100
+    else:
+        d_resampled = d_selected       
+        sr_resampled = sr_selected
+
+    d_looped = np.tile(d_resampled, loops)
+    d_louded = d_looped * loudness
+    d_pitched = librosa.effects.pitch_shift(y=d_louded, sr=sr_resampled, n_steps=ptch)
+    d_final = librosa.effects.time_stretch(d_pitched, rate=spd)
+    return audio_selected, d_final, sr_resampled, sr_selected
 
 
 @app.cell
 def _(audio_selected, clips_to_add, loops, loudness, ptch, spd, start_time):
     clips_to_add.loc[len(clips_to_add)] = [audio_selected, start_time, loops, loudness, ptch, spd]
+    return
 
-    for index, clip in enumerate(clips_to_add['clip']):
-        print(clip.split("temp", 1)[-1])
+
+@app.cell
+def _(patches, plt):
+    def plot_time_freq_boxes(boxes, 
+                             time_range=(0, 60), 
+                             freq_range=(0, 20000)):
+        """
+        Plot time-frequency boxes on a 2D plot with labels and colors.
+
+        Parameters
+        ----------
+        boxes : list of tuples
+            Each tuple = (t_start, t_end, f_start, f_end, label)
+        time_range : tuple
+            (min_time, max_time) for x-axis
+        freq_range : tuple
+            (min_freq, max_freq) for y-axis
+        """
+        fig, ax = plt.subplots(figsize=(10, 6))
+        ax.set_facecolor("black")  # black background
+
+        for (t_start, t_end, f_start, f_end, label) in boxes:
+            # Pick color based on label
+            if label.lower() == "seismic":
+                facecolor = "deeppink"
+                edgecolor = "hotpink"
+            elif label.lower() == "whale":
+                facecolor = "purple"
+                edgecolor = "violet"
+            else:
+                facecolor = "gray"
+                edgecolor = "lightgray"
+
+            # Draw box
+            rect = patches.Rectangle(
+                (t_start, f_start), 
+                t_end - t_start, 
+                f_end - f_start,
+                linewidth=1.5, edgecolor=edgecolor, facecolor=facecolor, alpha=0.8
+            )
+            ax.add_patch(rect)
+
+            # Add label text at the center of the box
+            # ax.text(
+            #     (t_start + t_end) / 2, 
+            #     (f_start + f_end) / 2, 
+            #     label, 
+            #     color="white", ha="center", va="center", fontsize=9, weight="bold"
+            # )
+
+        # Set limits and labels
+        ax.set_xlim(time_range)
+        ax.set_ylim(freq_range)
+        ax.set_xlabel("Time (s)", color="Purple")
+        ax.set_ylabel("Frequency (Hz)", color="Purple")
+        ax.set_title("MY SONG", color="Purple")
+
+        # White ticks
+        ax.tick_params(colors="white")
+
+        return fig
+
+
     return
 
 
