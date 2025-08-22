@@ -467,22 +467,94 @@ def _(mo):
 
 
 @app.cell
-def _(empty_audio, final_wav, plot_waveform, sr_resampled):
-    if "final_wav" in locals() and final_wav is not None:
-        fig3 = plot_waveform(final_wav, sr_resampled)
+def _(clips_to_add, np, plt, wavfile):
+    def plot_clips(clips_to_add):
+        fig, ax = plt.subplots(figsize=(12, 3))
+        num_clips = len(clips_to_add)
 
-    else:
-        fig3 = plot_waveform(empty_audio, sr_resampled)
+        if num_clips == 0:
+            ax.set_title("Your New Song (Nothing Added Yet)")
+            ax.set_xlabel("Time [s]")
+            ax.set_ylabel("Amplitude")
+            ax.set_xticks([])
+            ax.set_yticks([])
+            return fig
+        colors = plt.cm.tab10(np.linspace(0, 1, num_clips))  # distinct colors
+
+        for i, (idx, row) in enumerate(clips_to_add.iterrows()):
+            clip_path = row[0]  # Assuming first column is audio file path
+            sr, data = wavfile.read(clip_path)
+
+            # Convert stereo -> mono if needed
+            if len(data.shape) > 1:
+                data = data.mean(axis=1)
+
+            time = np.arange(len(data)) / sr
+            ax.plot(time, data, color=colors[i], label=f"Clip {i+1}")
+
+        ax.set_title("Your New Song")
+        ax.set_xlabel("Time [s]")
+        ax.set_ylabel("Amplitude")
+        ax.set_xlim(0, 30)
+        ax.legend()
+        ax.grid(alpha=0.3)
+        fig.tight_layout()
+        return fig
+
+    fig3 = plot_clips(clips_to_add)
     fig3
     return
 
 
 @app.cell
-def _(empty_audio, final_wav, plot_spectrogram, sr_resampled):
-    if "final_wav" in locals() and final_wav is not None:
-        fig4 = plot_spectrogram(final_wav, sr_resampled)
-    else:
-        fig4 = plot_spectrogram(empty_audio, sr_resampled)
+def _(clips_to_add, np, plt, spectrogram, wavfile):
+    def plot_combined_spectrogram(clips_to_add):
+        # Handle empty clips case
+        if clips_to_add.empty:
+            fig, ax = plt.subplots(figsize=(10, 3))
+            ax.set_title("Your New Song (Nothing Added Yet)")
+            ax.set_xticks([])
+            ax.set_yticks([])
+            return fig
+
+        combined_audio = []
+        sr = None
+
+        # Load all clips and concatenate
+        for idx, row in clips_to_add.iterrows():
+            clip_path = row[0]  # Assuming first column is audio path
+            clip_sr, data = wavfile.read(clip_path)
+
+            # Handle stereo -> mono
+            if len(data.shape) > 1:
+                data = data.mean(axis=1)
+
+            # Ensure sample rates are consistent
+            if sr is None:
+                sr = clip_sr
+            elif sr != clip_sr:
+                raise ValueError(f"Sample rate mismatch: expected {sr}, got {clip_sr}")
+
+            combined_audio.append(data)
+
+        # Combine into one array
+        combined_audio = np.concatenate(combined_audio)
+
+        # Compute spectrogram
+        f, t, Sxx = spectrogram(combined_audio, fs=sr, nperseg=1024, noverlap=512)
+
+        # Plot
+        fig, ax = plt.subplots(figsize=(12, 6))
+        im = ax.pcolormesh(t, f, 10 * np.log10(Sxx + 1e-10), shading="auto", cmap="magma")
+        fig.colorbar(im, ax=ax, label="Power (dB)")
+        ax.set_title("Your New Song")
+        ax.set_xlabel("Time [s]")
+        ax.set_ylabel("Frequency [Hz]")
+        ax.set_ylim(0, sr / 2)  # Nyquist limit
+
+        fig.tight_layout()
+        return fig
+    fig4 = plot_combined_spectrogram(clips_to_add)
     fig4
     return
 
@@ -501,7 +573,7 @@ def _(button_export, clips_to_add, combine_clips, finalwav):
         final_wavPath, final_wav = combine_clips(clips_to_add)
         final_mp3 = finalwav.export_to_mp3(final_wavPath)
         print("Exported mix to:", final_mp3)
-    return (final_wav,)
+    return
 
 
 @app.cell
@@ -662,7 +734,7 @@ def _(np, plt):
         plt.tight_layout()
 
         return fig
-    return (plot_spectrogram,)
+    return plot_spectrogram, spectrogram
 
 
 @app.cell
@@ -829,7 +901,7 @@ def _(np, pd, wavfile):
     wavfile.write('my_song.wav', sample_rate, empty_audio)
     print("The original empty song file is length: ", len(empty_audio))
     print(clips_to_add)
-    return clips_to_add, empty_audio
+    return (clips_to_add,)
 
 
 @app.cell
