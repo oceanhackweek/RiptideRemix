@@ -12,9 +12,12 @@ COPY --link *.py ./
 COPY --link contributor_folders/kasey ./contributor_folders/kasey
 COPY --link ./Images/ /home/jovyan/ohw25_proj_RiptideRemix/Images/
 COPY --link ./Library/ /home/jovyan/ohw25_proj_RiptideRemix/Library/
+COPY --link ./data/ /home/jovyan/ohw25_proj_RiptideRemix/data/
 
 RUN mkdir __marimo__ && \
-    chmod -R 777 __marimo__
+    chmod -R 777 __marimo__ && \
+    chmod -R 777 /home/jovyan/ohw25_proj_RiptideRemix && \
+    chmod -R 777 .
 
 EXPOSE 10000
 
