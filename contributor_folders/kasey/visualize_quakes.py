@@ -401,10 +401,7 @@ def _():
     colors = [
                 'k', 'r', 'b', 'g',                   
                 'orange','purple',         
-                'cyan','magenta',     
-                'brown','olive',
-                'teal','pink','gold'
-                'darkred', 'navy',  
+                'cyan','magenta' 
             ]
     return arrival_colors, colors, phase_types
 
@@ -463,7 +460,7 @@ def _(
     )
     color = random.choice(colors)  
 
-    fig = plt.figure(figsize=(15, 4))
+    fig = plt.figure(figsize=(15, 6))
     plt.plot(t, tr_filt.data, label=f'{fmin}–{fmax} Hz', color=color)
     plt.xlabel("Time after(s)")
     plt.ylabel("Amplitude")
@@ -494,6 +491,18 @@ def _(np, plt, spectrogram, tr_filt):
     plt.colorbar(label='Intensity [dB]')
     plt.ylim(0, 1000)
     fig2
+    return
+
+
+@app.cell
+def _(event_lat, event_lon, station_info, station_lat, station_lon):
+    fig5 = generate_rose_plot(event_lat, event_lon, station_lat, station_lon, station_info)
+    return (fig5,)
+
+
+@app.cell
+def _(fig5):
+    fig5
     return
 
 
@@ -573,7 +582,7 @@ def _(mo):
 @app.cell
 def _(ccrs, cfeature, plt):
     def plot_event_station_map(event_lat, event_lon, station_lat, station_lon, station_info):
-        fig = plt.figure(figsize=(14, 6))
+        fig = plt.figure(figsize=(10, 5))
         ax = plt.axes(projection=ccrs.PlateCarree())
         ax.set_title(f"Map: {station_info['network']}.{station_info['station']} and Earthquake", fontsize=14)
         ax.add_feature(cfeature.LAND)
@@ -597,6 +606,33 @@ def _(ccrs, cfeature, plt):
         plt.tight_layout()
         return fig
     return (plot_event_station_map,)
+
+
+@app.function
+def generate_rose_plot(event_lat, event_lon, station_lat, station_lon, station_info):
+    from obspy.geodetics import gps2dist_azimuth
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    _, azimuth, back_azimuth = gps2dist_azimuth(event_lat, event_lon, station_lat, station_lon)
+
+    fig, ax = plt.subplots(subplot_kw={'projection': 'polar'}, figsize=(7, 6))
+    ax.set_theta_zero_location('N')    # North at the top
+    ax.set_theta_direction(-1)         # Clockwise
+    ax.set_title(f"Azimuth from EQ to {station_info['station']}", va='bottom', fontsize=14)
+    ax.bar(np.deg2rad(azimuth), 1, width=np.deg2rad(4), color='red', alpha=0.3, label='Azimuth (EQ ➝ Station)')
+    ax.bar(np.deg2rad(back_azimuth), 1, width=np.deg2rad(4), color='blue', alpha=0.3, label='Back-Azimuth')
+    ax.plot(np.deg2rad(azimuth), 1.05, marker='*', markersize=15, color='red', label='Earthquake')
+    ax.plot(np.deg2rad(back_azimuth), 1.05, marker='^', markersize=10, color='gold', label='Station')
+    ax.set_yticklabels([])
+    ax.set_rmax(1.2)
+    ax.text(0, 1.15, 'N', ha='center', va='center', fontsize=12)
+    ax.text(np.pi/2, 1.15, 'E', ha='center', va='center', fontsize=12)
+    ax.text(np.pi, 1.15, 'S', ha='center', va='center', fontsize=12)
+    ax.text(3*np.pi/2, 1.15, 'W', ha='center', va='center', fontsize=12)
+    ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1))
+    plt.tight_layout()
+    return fig
 
 
 if __name__ == "__main__":
