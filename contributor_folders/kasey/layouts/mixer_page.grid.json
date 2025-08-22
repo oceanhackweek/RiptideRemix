@@ -34,7 +34,12 @@
         ]
       },
       {
-        "position": null
+        "position": [
+          0,
+          62,
+          10,
+          9
+        ]
       },
       {
         "position": [
@@ -229,12 +234,22 @@
       },
       {
         "position": [
-          4,
+          3,
+          48,
+          2,
+          2
+        ]
+      },
+      {
+        "position": [
+          5,
           48,
           3,
           3
-        ],
-        "side": "right"
+        ]
+      },
+      {
+        "position": null
       },
       {
         "position": null
@@ -277,7 +292,7 @@
       },
       {
         "position": [
-          1,
+          0,
           48,
           3,
           2
@@ -321,12 +336,39 @@
       },
       {
         "position": [
-          7,
-          48,
-          2.5,
-          3
+          9,
+          74,
+          1,
+          2
         ],
         "side": "right"
+      },
+      {
+        "position": [
+          9,
+          48,
+          1,
+          2
+        ]
+      },
+      {
+        "position": null
+      },
+      {
+        "position": [
+          1,
+          59,
+          2,
+          2
+        ]
+      },
+      {
+        "position": [
+          3,
+          59,
+          3,
+          2
+        ]
       },
       {
         "position": null
@@ -338,6 +380,12 @@
           3,
           2
         ]
+      },
+      {
+        "position": null
+      },
+      {
+        "position": null
       },
       {
         "position": null
@@ -357,6 +405,9 @@
           10,
           3
         ]
+      },
+      {
+        "position": null
       },
       {
         "position": null

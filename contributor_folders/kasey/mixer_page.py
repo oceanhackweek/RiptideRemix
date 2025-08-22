@@ -294,12 +294,55 @@ def _(clip_list, mo):
 @app.cell
 def _(clip_dropdown, clips_path, os):
     selected_audio = os.path.join(clips_path, clip_dropdown.selected_key)
-    return (selected_audio,)
+    return
 
 
 @app.cell
-def _(ipd, selected_audio):
-    ipd.Audio(selected_audio)
+def _(mo):
+    button_preview = mo.ui.run_button(label="Update preview")
+    button_preview
+    return (button_preview,)
+
+
+@app.cell
+def _(
+    audio_selected,
+    button_preview,
+    ipd,
+    np,
+    process_one_clip_to_add,
+    slider_amp,
+    slider_loops,
+    slider_pitch,
+    slider_speed,
+    slider_t,
+):
+    if button_preview.value and audio_selected:
+        print(
+            audio_selected,
+            slider_t.value,
+            slider_loops.value,
+            slider_amp.value,
+            slider_pitch.value,
+            slider_speed.value
+        )
+        sr_clip, d_clip = process_one_clip_to_add(
+            audio_selected,
+            slider_t.value,
+            slider_loops.value,
+            slider_amp.value,
+            slider_pitch.value,
+            slider_speed.value
+        )
+        if np.max(np.abs(d_clip)) > 0:
+            d_clip = d_clip / np.max(np.abs(d_clip))
+    
+        ipd.display(ipd.Audio(d_clip, rate=sr_clip))
+    return
+
+
+@app.cell
+def _():
     return
 
 
@@ -414,7 +457,7 @@ def _(slider_amp, slider_loops, slider_pitch, slider_speed, slider_t):
 @app.cell
 def _(mo):
     # start time
-    slider_t = mo.ui.slider(0, 30.0, label='Time in Song (s)')
+    slider_t = mo.ui.slider(0, 30, label='Time in Song (s)')
     slider_t 
     return (slider_t,)
 
@@ -422,7 +465,7 @@ def _(mo):
 @app.cell
 def _(mo):
     # ptch_spd
-    slider_speed = mo.ui.slider(0, 2, .1, label='Speed', value=1)
+    slider_speed = mo.ui.slider(0, 2, label='Speed', value=1)
     slider_speed
     return (slider_speed,)
 
@@ -430,7 +473,7 @@ def _(mo):
 @app.cell
 def _(mo):
     # reporpoise
-    slider_pitch = mo.ui.slider(0, 2, .1, label='Pitch', value=1)
+    slider_pitch = mo.ui.slider(0, 2, label='Pitch', value=1)
     slider_pitch
     return (slider_pitch,)
 
@@ -438,7 +481,7 @@ def _(mo):
 @app.cell
 def _(mo):
     # loudness
-    slider_amp = mo.ui.slider(0, 2, .1, label='Amplitude (dB)', value=1)
+    slider_amp = mo.ui.slider(0, 2, label='Amplitude (dB)', value=1)
     slider_amp
     return (slider_amp,)
 
@@ -452,35 +495,72 @@ def _(mo):
 
 
 @app.cell
-def _(mo):
+def _():
     # a button that when clicked will have its value set to True;
     # any cells referencing that button will automatically run.
-    button_addclip = mo.ui.run_button(label='Add Clip')
-    button_addclip
-    return (button_addclip,)
+    # button_addclip = mo.ui.run_button(label='Add Clip')
+    # button_addclip
+    return
+
+
+@app.cell
+def _(mo):
+    # Add to mix
+    button_add_clip = mo.ui.run_button(label="Add Clip")
+    button_add_clip
+    return (button_add_clip,)
 
 
 @app.cell
 def _(
     audio_selected,
-    button_addclip,
+    button_add_clip,
     clips_to_add,
-    ipd,
-    loops,
-    loudness,
-    np,
-    process_one_clip_to_add,
-    ptch,
-    spd,
-    start_time,
-    wavfile,
+    slider_amp,
+    slider_loops,
+    slider_pitch,
+    slider_speed,
+    slider_t,
 ):
-    if button_addclip.value:
-        print('ADDING A CLIP!!!')
-        clips_to_add.loc[len(clips_to_add)] = [audio_selected, start_time, loops, loudness, ptch, spd]
-        temp_sr, temp_d = process_one_clip_to_add(audio_selected, start_time, loops, loudness, ptch, spd)
-        wavfile.write('temp_clip.wav', temp_sr, np.array(temp_d, dtype=np.float32))
-        ipd.Audio('temp_clip.wav')
+    if button_add_clip.value and audio_selected:
+        clips_to_add.loc[len(clips_to_add)] = [
+            audio_selected,
+            slider_t.value,
+            slider_loops.value,
+            slider_amp.value,
+            slider_pitch.value,
+            slider_speed.value
+        ]
+        print(f"Added clip to mix: {audio_selected}")
+
+    return
+
+
+@app.cell
+def _(mo):
+    # Play full mix
+    button_play_mix = mo.ui.run_button(label="Play Full Mix")
+    button_play_mix
+    return (button_play_mix,)
+
+
+@app.cell
+def _(build_mix_array, button_play_mix, clips_to_add, ipd):
+    if button_play_mix.value and len(clips_to_add) > 0:
+        sr_mix, mix_data_array = build_mix_array(clips_to_add)
+        ipd.display(ipd.Audio(mix_data_array, rate=sr_mix))
+
+    return
+
+
+@app.cell
+def _():
+    # if button_addclip.value:
+    #     print('ADDING A CLIP!!!')
+    #     clips_to_add.loc[len(clips_to_add)] = [audio_selected, start_time, loops, loudness, ptch, spd]
+    #     temp_sr, temp_d = process_one_clip_to_add(audio_selected, start_time, loops, loudness, ptch, spd)
+    #     wavfile.write('temp_clip.wav', temp_sr, np.array(temp_d, dtype=np.float32))
+    #     ipd.Audio('temp_clip.wav')
 
     return
 
@@ -489,6 +569,48 @@ def _(
 def _(mo):
     mo.md(r"""### Acoustic Modifiers""")
     return
+
+
+@app.cell
+def _():
+    # List of clips that have been added to the mix
+    # mix_clips = pd.DataFrame(columns=['clip', 'start_time', 'loops', 'loudness', 'pitch', 'speed'])
+
+    return
+
+
+@app.cell
+def _(np, process_one_clip_to_add):
+    def build_mix_array(mix_clips, sr=44100, duration=60):
+        """
+        Combine all clips in mix_clips into a single audio array.
+        Each row should have: 'clip', 'start_time', 'loops', 'loudness', 'pitch', 'speed'
+        """
+        mix_array = np.zeros(duration * sr, dtype=np.float32)
+
+        for _, row in mix_clips.iterrows():
+            sr_clip, clip_data = process_one_clip_to_add(
+                row['clip'],
+                row['start_time'],
+                row['loops'],
+                row['loudness'],
+                row['pitch'],
+                row['speed'],
+                gen_sr=sr,
+                max_len=duration
+            )
+
+            # Ensure clip fits in the mix
+            if len(clip_data) > len(mix_array):
+                clip_data = clip_data[:len(mix_array)]
+            mix_array[:len(clip_data)] += clip_data
+
+        # Normalize
+        if np.max(np.abs(mix_array)) > 0:
+            mix_array = mix_array / np.max(np.abs(mix_array))
+
+        return sr, mix_array
+    return (build_mix_array,)
 
 
 @app.cell
@@ -509,9 +631,29 @@ def _(mo):
 
 
 @app.cell
-def _(mo):
-    button_mixerplay = mo.ui.run_button(label='Play')
-    button_mixerplay
+def _():
+    # button_mixerplay = mo.ui.run_button(label='Play')
+    # button_mixerplay
+    return
+
+
+@app.cell
+def _(
+    button_export,
+    button_mixerplay,
+    clips_to_add,
+    combine_clips,
+    export_to_mp3,
+    ipd,
+):
+    if button_mixerplay.value:
+        final_wav = combine_clips(clips_to_add)
+        ipd.display(ipd.Audio(final_wav))
+
+    if button_export.value:
+        final_wav = combine_clips(clips_to_add)
+        final_mp3 = export_to_mp3(final_wav)
+        print("Exported mix to:", final_mp3)
     return
 
 
@@ -521,7 +663,7 @@ def _(mo):
     # any cells referencing that button will automatically run.
     button_export = mo.ui.run_button(label='Export file')
     button_export
-    return
+    return (button_export,)
 
 
 @app.cell
@@ -749,25 +891,48 @@ def _(librosa, np, signal, wavfile):
 
 
 @app.cell
-def _(np, plt, process_one_clip_to_add, wavfile):
-    # REMIX
-    def combine_clips(base_song, clips_to_add):
-        sr_base, d_base = wavfile.read(base_song)
-        plt.figure(figsize=(10, 4))
-        plt.plot(np.arange(0, len(d_base)) / sr_base, d_base, 'b')
-        srs, ds, combined_sounds = ([], [], d_base)
-        for index, row in clips_to_add.iterrows():
-            sr, d = process_one_clip_to_add(row['clip'], row['start_time'], row['loops'], row['loudness'], row['pitch_speed'])
-            srs.append(sr)
-            ds.append(d)
-            plt.plot(np.arange(0, len(d)) / sr, d - 1.5 * index, 'r')
-            combined_sounds += d
-        (plt.xlabel('Time (s)'), plt.ylabel('Amplitude'))
-        plt.title('My Song!')
-        plt.grid(True, alpha=0.3)
-        wavfile.write('my_final_song.wav', sr_base, np.array(combined_sounds, dtype=np.float32))
-        return
-    return
+def _(np, process_one_clip_to_add, wavfile):
+    # from chatgpt:
+    def combine_clips(clips_to_add, output_wav="my_final_song.wav", sr=44100, duration=60):
+        """
+        Combine all clips from the clips_to_add DataFrame into one overlapping mix.
+        - Each row in clips_to_add contains: clip name, start_time, loops, loudness, pitch, speed
+        - Mix length is fixed by duration (seconds).
+        """
+
+        total_samples = sr * duration
+        final_mix = np.zeros(total_samples, dtype=np.float32)
+
+        for _, row in clips_to_add.iterrows():
+            sr_clip, d_clip = process_one_clip_to_add(
+                row['clip'],
+                row['start_time'],
+                row['loops'],
+                row['loudness'],
+                row['pitch'],
+                row['speed'],
+                gen_sr=sr,
+                max_len=duration
+            )
+
+            # Align this clip in time
+            start_sample = int(float(row['start_time']) * sr)
+            end_sample = start_sample + len(d_clip)
+
+            if start_sample < total_samples:
+                # Clip if it runs off the end
+                end_sample = min(end_sample, total_samples)
+                clip_segment = d_clip[:end_sample - start_sample]
+                final_mix[start_sample:end_sample] += clip_segment.astype(np.float32)
+
+        # Normalize to prevent clipping
+        if np.max(np.abs(final_mix)) > 0:
+            final_mix /= np.max(np.abs(final_mix))
+
+        wavfile.write(output_wav, sr, final_mix)
+        return output_wav
+
+    return (combine_clips,)
 
 
 @app.cell
