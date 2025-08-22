@@ -141,20 +141,8 @@ def _(mo):
 
 @app.cell(column=2)
 def _(mo):
-    mo.md(r"""## LIBRARY""")
-    return
-
-
-@app.cell
-def _(mo):
     mo.md(r"""Scientists use Ocean Bottom Seismometers (OBS) to measure vibrations in the seafloor, monitor earthquakes, and study the movement of Earth beneath the ocean. This helps researchers understand geological processes in ways that aren’t visible from the surface. In this interface, anyone can look at the data through these seismic waveforms produced from different Earthquakes.""")
     return
-
-
-@app.cell
-def _(mo):
-    category_dropdown = mo.ui.dropdown(options={'Seismic Event': 1, 'Cetacean Call': 2, 'Anthropogenic': 3, 'Other': 3}, value = 'Cetacean Call')
-    return (category_dropdown,)
 
 
 @app.cell
@@ -164,8 +152,45 @@ def _(mo):
 
 
 @app.cell
+def _(UTCDateTime):
+
+    big_events = { "Japan_2011": { "start_time": UTCDateTime("2011-03-11T05:46:23"), 
+                                  "latitude": 38.297, "longitude": 142.372, "depth_km": 29
+                                 },
+                   "Alaska_2021": { "start_time": UTCDateTime("2021-07-29T06:15:49"),
+                                    "latitude": 55.325,"longitude": -157.972, "depth_km": 32
+                                  },
+                   "Russia_2025": {"start_time": UTCDateTime("2025-07-25T00:15:30"),
+                                   "latitude": 54.000, "longitude": 160.0000, "depth_km": 25
+                                  }
+                }
+    return (big_events,)
+
+
+@app.cell
+def _(selected_network, selected_station):
+    station_info = {
+        "station": selected_station,
+        "network": selected_network
+    }
+    return (station_info,)
+
+
+@app.cell
 def _(mo):
     mo.md(r"""Earthquake:""")
+    return
+
+
+@app.cell
+def _(mo):
+    earthquake_dropdown = mo.ui.dropdown(options={'Japan_2011': 1, 'Alaska_2021': 2, 'Russia_2025': 3}, value = 'Japan_2011')
+    return (earthquake_dropdown,)
+
+
+@app.cell
+def _(earthquake_dropdown):
+    earthquake_dropdown
     return
 
 
@@ -177,153 +202,88 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    mo.md(r"""Sensor:""")
+    network_dropdown = mo.ui.dropdown(options={'AF': 1, 'AU': 2, 'G': 3, 'IM': 4, 'IP': 5, 'IU': 6, 'NJ': 7, 'NZ': 8}, value = 'AF')
+    return (network_dropdown,)
+
+
+@app.cell
+def _(network_dropdown):
+    network_dropdown
     return
 
 
 @app.cell
 def _(mo):
-    mo.md(r"""Clip:""")
+    mo.md(r"""Station:""")
     return
 
 
 @app.cell
-def _(category_dropdown):
-    category_dropdown
-    return
-
-
-@app.cell
-def _(category_dropdown, mo):
-    if category_dropdown.selected_key == 'Seismic Event':
-        labelopts = {'Japan2011': 1, 'Alaska2021': 2, 'Russia2025': 3}
-    elif category_dropdown.selected_key == 'Cetacean Call':
-        labelopts = {'Mysticetes': 1, 'Odontocetes': 2} # replace with available_wavs/cetacean
-    elif category_dropdown.selected_key == 'Anthropogenic':
-        labelopts = {"All": 1}
+def _(mo, network_dropdown):
+    if network_dropdown.selected_key == "AF":
+        statOpts = ["AAUS", "ANKE", "DESE", "EKNA", "IFE", "KAD", "NSU"]
+    elif network_dropdown.selected_key == "AU":
+        statOpts = ["MCQ"]
+    elif network_dropdown.selected_key == "G":
+        statOpts = ["MCQ"]
+    elif network_dropdown.selected_key == "IM":
+        statOpts = ["MCQ"]
+    elif network_dropdown.selected_key == "IP":
+        statOpts = ["MCQ"]
+    elif network_dropdown.selected_key == "IU":
+        statOpts = ["MCQ"]
+    elif network_dropdown.selected_key == "NJ":
+        statOpts = ["MCQ"]
+    elif network_dropdown.selected_key == "NZ":
+        statOpts = ["MCQ"]
     else:
-        labelopts = {"All": 1} # replace with available_wavs/other
+        statOpts = []
 
-    class_dropdown = mo.ui.dropdown(options=labelopts)
-    class_dropdown
-    return (class_dropdown,)
-
-
-@app.cell
-def _(basePath, category_dropdown, class_dropdown, mo, os):
-    if category_dropdown.selected_key == 'Cetacean Call':
-        sc_path = basePath / "Library" / "Cetacean" / class_dropdown.selected_key
-        sc_list = os.listdir(sc_path)
-        sc_dict = {sc_list[i]: i for i in range(len(sc_list))}
-    elif category_dropdown.selected_key == 'Seismic Event':
-        sc_dict = {"All": 1}
-    else:
-        sc_dict = {"All": 1}
-    sc_dropdown = mo.ui.dropdown(options=sc_dict)
-    return (sc_dropdown,)
+    station_dropdown = mo.ui.dropdown(options=statOpts)
+    return (station_dropdown,)
 
 
 @app.cell
-def _(sc_dropdown):
-    sc_dropdown
-    return
-
-
-@app.cell
-def _(basePath, category_dropdown, class_dropdown, os, sc_dropdown):
-    if category_dropdown.selected_key == 'Cetacean Call':
-        clips_path = basePath / "Library" / "Cetacean" / class_dropdown.selected_key / sc_dropdown.selected_key
-        clip_list = os.listdir(clips_path)
-    elif category_dropdown.selected_key == 'Seismic Event':
-        clips_path = basePath / "Library" / "Seismic" / class_dropdown.selected_key
-        clip_list = os.listdir(clips_path)
-    elif category_dropdown.selected_key == 'Anthropogenic':
-        clips_path = basePath / "Library" / "Anthropogenic" 
-        clip_list = os.listdir(clips_path)
-    else:
-        clips_path = basePath / "Library" / "Other"
-        clip_list = os.listdir(clips_path)
-    return clip_list, clips_path
-
-
-@app.cell
-def _(clip_list, mo):
-    clip_dict = {clip_list[i]: i for i in range(len(clip_list))}
-    clip_dropdown = mo.ui.dropdown(options=clip_dict)
-    clip_dropdown
-    return (clip_dropdown,)
-
-
-@app.cell
-def _(clip_dropdown, clips_path, os):
-    selected_audio = os.path.join(clips_path, clip_dropdown.selected_key)
+def _(station_dropdown):
+    station_dropdown
     return
 
 
 @app.cell
 def _(mo):
-    button_preview = mo.ui.run_button(label="Update preview")
-    button_preview
-    return (button_preview,)
-
-
-@app.cell
-def _(
-    audio_selected,
-    button_preview,
-    ipd,
-    np,
-    process_one_clip_to_add,
-    slider_amp,
-    slider_loops,
-    slider_pitch,
-    slider_speed,
-    slider_t,
-):
-    if button_preview.value and audio_selected:
-        print(
-            audio_selected,
-            slider_t.value,
-            slider_loops.value,
-            slider_amp.value,
-            slider_pitch.value,
-            slider_speed.value
-        )
-        sr_clip, d_clip = process_one_clip_to_add(
-            audio_selected,
-            slider_t.value,
-            slider_loops.value,
-            slider_amp.value,
-            slider_pitch.value,
-            slider_speed.value
-        )
-        if np.max(np.abs(d_clip)) > 0:
-            d_clip = d_clip / np.max(np.abs(d_clip))
-
-        ipd.display(ipd.Audio(data=d_clip, rate=sr_clip))
+    mo.md(r"""Channel:""")
     return
 
 
 @app.cell
-def _():
-    # Keep this for displaying wave form, spectrogram, and explanation of clip
-    # stretch goal for educational piece
-    # button_libraryadd = mo.ui.run_button(label='Explore this sound')
-    # button_libraryadd
+def _(mo):
+    channel_dropdown = mo.ui.dropdown(options={'BH1': 1, 'BH2': 2, 'BHZ': 3}, value = 'BH1')
+    return (channel_dropdown,)
+
+
+@app.cell
+def _(channel_dropdown):
+    channel_dropdown
     return
 
 
 @app.cell
-def _(d_final, plot_waveform, sr_resampled):
-    fig = plot_waveform(d_final, sr_resampled)
-    fig
+def _(mo):
+    mo.md(r"""Filter:""")
     return
 
 
 @app.cell
-def _(d_final, plot_spectrogram, sr_selected):
-    fig2 = plot_spectrogram(d_final, sr_selected)
-    fig2
+def _(mo):
+    filter_ranges = { "0.01 - 0.10 Hz": (0.01, 0.10), "0.05 - 0.20 Hz": (0.05, 0.20), "0.01 - 0.50 Hz": (0.01, 0.50), "0.03 - 0.10 Hz": (0.03, 0.10), "0.03 - 0.15 Hz": (0.03, 0.15) }
+
+    filter_dropdown = mo.ui.dropdown(options=list(filter_ranges.keys()))
+    return filter_dropdown, filter_ranges
+
+
+@app.cell
+def _(filter_dropdown):
+    filter_dropdown
     return
 
 
@@ -334,55 +294,201 @@ def _(mo):
 
 
 @app.cell
-def _(slider_amp, slider_loops, slider_pitch, slider_speed, slider_t):
-    start_time = slider_t.value
-    ptch = slider_pitch.value
-    spd = slider_speed.value
-    # ptch_speed = slider_speed.value
-    loops = slider_loops.value # slider_f.value
-    loudness = slider_amp.value
+def _():
+    import obspy as os
+    import obspy.signal
+    from obspy.clients.fdsn import Client
+    from obspy import clients
+    from obspy import UTCDateTime
+    import matplotlib.pyplot as plt
+    from obspy.taup import TauPyModel
+    from obspy.geodetics import locations2degrees
+    from scipy.io import wavfile
+    import IPython.display as ipd
+    import cartopy.crs as ccrs
+    import cartopy.feature as cfeature
+    import random
+    from scipy.signal import spectrogram
+    import numpy as np
+    return (
+        Client,
+        TauPyModel,
+        UTCDateTime,
+        ccrs,
+        cfeature,
+        locations2degrees,
+        np,
+        plt,
+        random,
+        spectrogram,
+    )
 
+
+@app.cell
+def _(
+    Client,
+    TauPyModel,
+    big_events,
+    channel_dropdown,
+    earthquake_dropdown,
+    locations2degrees,
+    network_dropdown,
+    station_dropdown,
+):
+    client = Client('IRIS')
+    model = TauPyModel(model = "ak135")      # In the dropdown menu we can have models using either models "iasp91", "ak135", "ak135f", "prem"
+
+
+    selected_event = earthquake_dropdown.selected_key
+    selected_network = network_dropdown.selected_key       #I don't know how this will be connected to networ_stations, i don't know how 
+    selected_station = station_dropdown.selected_key
+    selected_channel = channel_dropdown.selected_key      # We can have a drop down for three channels(BH1, BH2, BHZ), for now maybe just
+    selected_location = "*"        # Thwill serve as a wildcat (*), you can use various wildcat tho in the drop down, 
+                                   # eg BH?, LH?
+
+    event = big_events[selected_event]
+    start_time = event["start_time"]
+    end_time = start_time + 10000
+    event_lat = event["latitude"]
+    event_lon = event["longitude"]
+    event_depth_km = event["depth_km"]
+
+    try:
+        st = client.get_waveforms(selected_network, selected_station, selected_location,
+                                  selected_channel, start_time, end_time, attach_response=True
+                                 )
+        st_rem = st.copy()
+        st_rem.remove_response(output="VEL")
+        st_rem.detrend('linear')
+        st_rem.detrend('demean')
+        tr = st_rem[0]
+
+        inv = client.get_stations( network=selected_network, station=selected_station,
+                               level="station", starttime=start_time, endtime=end_time
+                             )
+        sta = inv[0][0]
+        station_lat = sta.latitude
+        station_lon = sta.longitude
+        distance_deg = locations2degrees(event_lat, event_lon, station_lat, station_lon)
+    except Exception as e:
+        print(f"There was a download error, please check inputs Maybe incorrect channel, station and network name Ensure your input is correct and well written: {e}")
+    return (
+        distance_deg,
+        event_depth_km,
+        event_lat,
+        event_lon,
+        model,
+        selected_channel,
+        selected_event,
+        selected_network,
+        selected_station,
+        station_lat,
+        station_lon,
+        tr,
+    )
+
+
+@app.cell
+def _():
+    phase_types = ["P", "S", "SKS", "SKKS"]   
+                                                        #This part shows the TauP phases we wanna overlay on the plots
+                                                        # What this does that is shows the body waves(P&S) arrival amongst others
+    arrival_colors = {'P': 'r', 
+                      'S': 'g', 
+                      'SKS': 'b', 
+                      'SKKS': 'm'}
+
+    colors = [
+                'k', 'r', 'b', 'g',                   
+                'orange','purple',         
+                'cyan','magenta',     
+                'brown','olive',
+                'teal','pink','gold'
+                'darkred', 'navy',  
+            ]
+    return arrival_colors, colors, phase_types
+
+
+@app.cell
+def _(
+    event_lat,
+    event_lon,
+    plot_event_station_map,
+    station_info,
+    station_lat,
+    station_lon,
+):
+    import warnings
+    warnings.simplefilter("ignore")
+    plot_event_station_map(event_lat, event_lon, station_lat, station_lon, station_info)
     return
 
 
 @app.cell
-def _(mo):
-    # start time
-    slider_t = mo.ui.slider(0, 20.0, label='Time in Song (s)')
-    slider_t 
-    return (slider_t,)
+def _(
+    arrival_colors,
+    colors,
+    distance_deg,
+    event_depth_km,
+    filter_dropdown,
+    filter_ranges,
+    model,
+    phase_types,
+    plt,
+    random,
+    selected_channel,
+    selected_event,
+    selected_network,
+    selected_station,
+    tr,
+):
+    fmin = first_value = filter_ranges[filter_dropdown.selected_key][0]
+    fmax = first_value = filter_ranges[filter_dropdown.selected_key][1]
+
+    tr_filt = tr.copy()
+    tr_filt.filter("bandpass", freqmin=fmin, freqmax=fmax, corners=4, zerophase=True)
+    tr_filt.data = tr_filt.data / max(abs(tr_filt.data))
+    t = tr_filt.times("relative")
+
+    arrivals = model.get_travel_times(
+        source_depth_in_km=event_depth_km,
+        distance_in_degree=distance_deg,
+        phase_list=phase_types
+    )
+    color = random.choice(colors)  
+
+    fig = plt.figure(figsize=(15, 4))
+    plt.plot(t, tr_filt.data, label=f'{fmin}–{fmax} Hz', color=color)
+    plt.xlabel("Time after(s)")
+    plt.ylabel("Amplitude")
+    plt.title(f"{selected_network}.{selected_station}.{selected_channel} | {selected_event} | {fmin}-{fmax} Hz")
+
+    for arr in arrivals:
+        if arr.name in arrival_colors:
+            plt.axvline(arr.time, color=arrival_colors[arr.name], linestyle='--', label=arr.name)
+
+    plt.grid(True)
+    plt.tight_layout()
+
+    fig
+    return (tr_filt,)
 
 
 @app.cell
-def _(mo):
-    # ptch_spd
-    slider_speed = mo.ui.slider(0, 2, .1, label='Speed', value=1)
-    slider_speed
-    return (slider_speed,)
+def _(np, plt, spectrogram, tr_filt):
+    sampling_rate = tr_filt.stats.sampling_rate
+    sampling_rate = 66150
 
-
-@app.cell
-def _(mo):
-    # reporpoise
-    slider_pitch = mo.ui.slider(0, 2, .1, label='Pitch', value=1)
-    slider_pitch
-    return (slider_pitch,)
-
-
-@app.cell
-def _(mo):
-    # loudness
-    slider_amp = mo.ui.slider(0, 2, .1, label='Amplitude (dB)', value=1)
-    slider_amp
-    return (slider_amp,)
-
-
-@app.cell
-def _(mo):
-    # loops
-    slider_loops = mo.ui.slider(0, 15, 1, label='Loops', value=1)
-    slider_loops
-    return (slider_loops,)
+    fig2 = plt.figure(figsize=(10, 4))
+    frequencies, time_segments, Sxx = spectrogram(tr_filt.data, fs=sampling_rate, nperseg=1024, noverlap=256, scaling='spectrum')
+    plt.pcolormesh(time_segments, frequencies, 10 * np.log10(Sxx + 1e-10), shading='gouraud', cmap='viridis', vmin=-99)
+    plt.ylabel('Frequency [Hz]')
+    plt.xlabel('Time [s]')
+    plt.title('Original Signal Spectrogram')
+    plt.colorbar(label='Intensity [dB]')
+    plt.ylim(0, 1000)
+    fig2
+    return
 
 
 @app.cell(column=4)
@@ -456,6 +562,35 @@ def _(mo):
 def _(mo):
     mo.md(r"""# Underlying Python functions""")
     return
+
+
+@app.cell
+def _(ccrs, cfeature, plt):
+    def plot_event_station_map(event_lat, event_lon, station_lat, station_lon, station_info):
+        fig = plt.figure(figsize=(14, 6))
+        ax = plt.axes(projection=ccrs.PlateCarree())
+        ax.set_title(f"Map: {station_info['network']}.{station_info['station']} and Earthquake", fontsize=14)
+        ax.add_feature(cfeature.LAND)
+        ax.add_feature(cfeature.OCEAN)
+        ax.add_feature(cfeature.COASTLINE)
+        ax.add_feature(cfeature.BORDERS, linestyle=':')
+        ax.add_feature(cfeature.LAKES, alpha=0.5)
+        ax.add_feature(cfeature.RIVERS)
+        ax.plot(station_lon, station_lat, marker='^', markersize=12, color='gold', label='Station')
+        ax.plot(event_lon, event_lat, marker='*', markersize=16, color='red', label='Earthquake')
+        ax.plot([station_lon, event_lon], [station_lat, event_lat], color='gray', linestyle='--', linewidth=1)
+        ax.text(station_lon + 1, station_lat + 1, station_info['station'], fontsize=9, color='black')
+        ax.text(event_lon + 1, event_lat + 1, "EQ", fontsize=9, color='darkred')
+        lat_min = min(event_lat, station_lat) - 60
+        lat_max = max(event_lat, station_lat) + 60
+        lon_min = min(event_lon, station_lon) - 40
+        lon_max = max(event_lon, station_lon) + 40
+        ax.set_extent([lon_min, lon_max, lat_min, lat_max], crs=ccrs.PlateCarree())
+        ax.gridlines(draw_labels=True, linestyle='--')
+        ax.legend(loc='upper right', fontsize=10)
+        plt.tight_layout()
+        plt.show()
+    return (plot_event_station_map,)
 
 
 if __name__ == "__main__":
