@@ -375,18 +375,10 @@ def _():
 
 
 @app.cell
-def _(duration, np, plot_waveform, sample_rate):
-    sample_rates=16000
-    duation = 3
-    t = np.linspace(0, duration, int(sample_rate * duration), endpoint=False)
-
-    # Two sine waves at 440 Hz (A4) and 880 Hz (A5)
-    freq1 = 1
-    signal2 = np.sin(1/freq1 * t)
-
-    fig = plot_waveform(signal2, sample_rates)
+def _(d_selected, plot_waveform, sr_selected):
+    fig = plot_waveform(d_selected, sr_selected)
     fig
-    return sample_rates, signal2
+    return
 
 
 @app.cell
@@ -862,7 +854,7 @@ def _(np, pd, wavfile):
     wavfile.write('my_song.wav', sample_rate, empty_audio)
     print("The original empty song file is length: ", len(empty_audio))
     print(clips_to_add)
-    return clips_to_add, duration, sample_rate
+    return (clips_to_add,)
 
 
 @app.cell
@@ -877,7 +869,7 @@ def _(clip_dropdown, clips_path, np, os, wavfile):
     audio_selected = os.path.join(clips_path, clip_dropdown.selected_key)
     sr_selected, d_selected = wavfile.read(audio_selected)
     d_selected = d_selected / np.max(np.abs(d_selected))
-    return (audio_selected,)
+    return audio_selected, d_selected, sr_selected
 
 
 @app.cell
