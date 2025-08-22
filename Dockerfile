@@ -8,10 +8,10 @@ COPY --link pixi.lock pixi.toml ./
 RUN --mount=type=cache,id=riptide_remix,target=/root/.cache/rattler/cache \
     pixi install --frozen -e default
 
-
 COPY --link *.py ./
 COPY --link contributor_folders/kasey ./contributor_folders/kasey
 COPY --link ./Images/ /home/jovyan/ohw25_proj_RiptideRemix/Images/
+COPY --link ./Library/ /home/jovyan/ohw25_proj_RiptideRemix/Library/
 
 RUN mkdir __marimo__ && \
     chmod -R 777 __marimo__
