@@ -239,6 +239,7 @@ def _(mo):
         "/": "Mix Sounds",  # internal
         "/learn": "Learn More",  # internal
         "/about": "About the Team",  # internal
+        "/quake": "Gather More Data"
     })
     nav_menu
     return
