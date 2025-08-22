@@ -246,7 +246,7 @@ def _(mo):
     mix_button = mo.ui.button(
         label="Mix Sounds",
         kind='neutral',
-        on_click=lambda _: webbrowser.open("http://10.19.147.127:8000/", new=0)  # URL for Mixer page
+        on_click=lambda _: webbrowser.open("/", new=0)  # URL for Mixer page
     )
     mix_button
     return (webbrowser,)
@@ -257,7 +257,7 @@ def _(mo, webbrowser):
     educate_button = mo.ui.button(
         label="Learn More",
         kind='neutral',
-        on_click=lambda _: webbrowser.open("http://10.19.147.127:8000/learn", new=0)  # URL for Learn More
+        on_click=lambda _: webbrowser.open("/learn", new=0)  # URL for Learn More
     )
     educate_button
     return
@@ -268,7 +268,7 @@ def _(mo, webbrowser):
     about_button = mo.ui.button(
         label="About the Team",
         kind='neutral',
-        on_click=lambda _: webbrowser.open("http://10.19.147.127:8000/about", new=0)  # URL for About
+        on_click=lambda _: webbrowser.open("/about", new=0)  # URL for About
     )
     about_button
     return
