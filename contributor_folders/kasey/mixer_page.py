@@ -112,42 +112,6 @@ def _(basePath, mo):
 
 @app.cell
 def _():
-    import numpy as np
-    import matplotlib.pyplot as plt
-    x = np.linspace(0, 10, 200)
-    y = np.sin(x)
-
-    # Create figure and plot
-    fig, ax = plt.subplots(figsize=(4, 1))
-    ax.plot(x, y, label="sin(x)")
-    ax.set_xlabel("x")
-    ax.set_ylabel("sin(x)")
-    ax.set_title("Original Waveform")
-    ax.legend()
-
-    fig 
-    return np, plt, x, y
-
-
-@app.cell
-def _(np, plt, x, y):
-    x2 = np.linspace(0, 10, 200)
-    y2 = np.tan(x)
-
-    # Create figure and plot
-    fig2, ax2 = plt.subplots(figsize=(4, 1))
-    ax2.plot(x, y, label="sin(x)")
-    ax2.set_xlabel("x")
-    ax2.set_ylabel("sin(x)")
-    ax2.set_title("Your New Waveform")
-    ax2.legend()
-
-    fig2
-    return
-
-
-@app.cell
-def _():
     boxes = [
         (5, 10, 1000, 3000, "seismic"),
         (15, 25, 5000, 7000, "whale"),
@@ -210,7 +174,7 @@ def _(mo):
         value=0, on_click=lambda value: value + 1, label="Mix Sounds", kind='neutral'
     )
     mix_button
-    return (webbrowser,)
+    return
 
 
 @app.cell
@@ -377,6 +341,88 @@ def _():
 def _(mo):
     library_loop = mo.ui.checkbox(label="Loop audio")
     library_loop
+    return
+
+
+@app.cell
+def _():
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    def plot_waveform(audio_data, sr):
+        # Handle stereo: take first channel if needed
+        if audio_data.ndim > 1:
+            audio_data = audio_data[:, 0]
+
+        # Normalize amplitude to [-1, 1]
+        audio_data = audio_data.astype(np.float32)
+        audio_data /= np.max(np.abs(audio_data))
+
+        # Time axis in seconds
+        duration = len(audio_data) / sr
+        times = np.linspace(0, duration, len(audio_data))
+
+        # Create the figure
+        fig, ax = plt.subplots(figsize=(10, 3))
+        ax.plot(times, audio_data, color="steelblue", linewidth = 0.2)
+        ax.set_xlim(0, duration)
+        ax.set_ylim(-1.1, 1.1)
+        ax.set_xlabel("Time [s]")
+        ax.set_ylabel("Amplitude")
+        ax.grid(alpha=0.3)
+        plt.tight_layout()
+
+        # For Marimo / Jupyter, returning fig allows inline display
+        return fig
+    return np, plot_waveform, plt
+
+
+@app.cell
+def _(duration, np, plot_waveform, sample_rate):
+    sample_rates=16000
+    duation = 3
+    t = np.linspace(0, duration, int(sample_rate * duration), endpoint=False)
+
+    # Two sine waves at 440 Hz (A4) and 880 Hz (A5)
+    freq1 = 1
+    signal2 = np.sin(1/freq1 * t)
+
+    fig = plot_waveform(signal2, sample_rates)
+    fig
+    return sample_rates, signal2
+
+
+@app.cell
+def _(np, plt):
+    from scipy.signal import spectrogram
+
+    def plot_spectrogram(audio_data, sr):
+        if audio_data.ndim > 1:
+            audio_data = audio_data[:, 0]
+
+        # Compute spectrogram
+        frequencies, time_segments, Sxx = spectrogram( audio_data, fs=sr, nperseg=1024, noverlap=256, scaling="spectrum")
+
+        # Convert power to dB
+        Sxx_dB = 10 * np.log10(Sxx + 1e-10)
+
+        # Create figure and plot
+        fig, ax = plt.subplots(figsize=(10, 4))
+        pcm = ax.pcolormesh( time_segments, frequencies, Sxx_dB, shading="gouraud", cmap="viridis", vmin=-99)
+        fig.colorbar(pcm, ax=ax, label="Intensity [dB]")
+        ax.set_ylabel("Frequency [Hz]")
+        ax.set_xlabel("Time [s]")
+        ax.set_ylim(0, sr / 2)
+        plt.tight_layout()
+
+        return fig
+    return (plot_spectrogram,)
+
+
+@app.cell
+def _(plot_spectrogram, sample_rates, signal2):
+    fig2 = plot_spectrogram(signal2, sample_rates)
+    fig2
     return
 
 
@@ -703,7 +749,7 @@ def _(librosa, np, signal, wavfile):
         if len(d.shape) > 1:
             d = d.mean(axis=1)
         if np.max(np.abs(d)) != 0: d = d / np.max(np.abs(d))  # Normalize the amplitudes
-    
+
         print("The raw sampling rate and length are: ", sr, len(d))
 
         # Modify sampling rate to match the file we are building on
@@ -711,23 +757,23 @@ def _(librosa, np, signal, wavfile):
             ratio = 44100 / sr
             d = signal.resample(d, int(len(d) * ratio))        # Use Fourier method for better quality
             sr = 44100
-    
+
         # Loop
         sr_looped, d_looped = loop(sr, d, loop_val)
         print("Length of looped file: ", len(d_looped))
 
         # Loudness
         sr_loop_amp, d_loop_amp = loud(sr_looped, d_looped, loud_val)
-    
+
         # Pitch
         sr_loop_amp_p, d_loop_amp_p = pitch(sr_loop_amp, d_loop_amp, ptch_val)
-    
+
         # Speed
         sr_loop_amp_p_s, d_loop_amp_p_s = speed(sr_loop_amp_p, d_loop_amp_p, spd_val)
 
         sr = sr_loop_amp_p_s
         d = d_loop_amp_p_s
-    
+
         # Length and start time adjustment
         start_chunk_len = start_time * sr
         strt_zero_chunk = np.zeros(start_chunk_len)
@@ -802,7 +848,7 @@ def _(np, pd, wavfile):
     wavfile.write('my_song.wav', sample_rate, empty_audio)
     print("The original empty song file is length: ", len(empty_audio))
     print(clips_to_add)
-    return (clips_to_add,)
+    return clips_to_add, duration, sample_rate
 
 
 @app.cell
