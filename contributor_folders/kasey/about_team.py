@@ -4,7 +4,7 @@ __generated_with = "0.14.17"
 app = marimo.App(
     width="columns",
     app_title="RiptideRemix_mixer",
-    layout_file="layouts/about_team.grid.json",
+    layout_file="layouts/about_team.grid.json"
 )
 
 

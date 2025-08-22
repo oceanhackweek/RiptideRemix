@@ -58,7 +58,7 @@ def _(basePath, mo):
     mo.image(
         src= basePath / "Images" /  "ArtGifs" / "placeholder.gif",
         alt="placeholder",
-        width=1200,
+        width=900,
         height=200,
         rounded=False,
         caption=""
@@ -81,12 +81,6 @@ def _(mo):
 @app.cell
 def _(mo):
     mo.md(r"""---""")
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""asdf""")
     return
 
 
@@ -294,12 +288,50 @@ def _(clip_list, mo):
 @app.cell
 def _(clip_dropdown, clips_path, os):
     selected_audio = os.path.join(clips_path, clip_dropdown.selected_key)
-    return (selected_audio,)
+    return
 
 
 @app.cell
-def _(ipd, selected_audio):
-    ipd.Audio(selected_audio)
+def _(mo):
+    button_preview = mo.ui.run_button(label="Update preview")
+    button_preview
+    return (button_preview,)
+
+
+@app.cell
+def _(
+    audio_selected,
+    button_preview,
+    ipd,
+    np,
+    process_one_clip_to_add,
+    slider_amp,
+    slider_loops,
+    slider_pitch,
+    slider_speed,
+    slider_t,
+):
+    if button_preview.value and audio_selected:
+        print(
+            audio_selected,
+            slider_t.value,
+            slider_loops.value,
+            slider_amp.value,
+            slider_pitch.value,
+            slider_speed.value
+        )
+        sr_clip, d_clip = process_one_clip_to_add(
+            audio_selected,
+            slider_t.value,
+            slider_loops.value,
+            slider_amp.value,
+            slider_pitch.value,
+            slider_speed.value
+        )
+        if np.max(np.abs(d_clip)) > 0:
+            d_clip = d_clip / np.max(np.abs(d_clip))
+
+        ipd.display(ipd.Audio(data=d_clip, rate=sr_clip))
     return
 
 
@@ -313,82 +345,15 @@ def _():
 
 
 @app.cell
-def _(mo):
-    library_loop = mo.ui.checkbox(label="Loop audio")
-    library_loop
-    return
-
-
-@app.cell
-def _():
-    import numpy as np
-    import matplotlib.pyplot as plt
-
-    def plot_waveform(audio_data, sr):
-        # Handle stereo: take first channel if needed
-        if audio_data.ndim > 1:
-            audio_data = audio_data[:, 0]
-
-        # Normalize amplitude to [-1, 1]
-        audio_data = audio_data.astype(np.float32)
-        audio_data /= np.max(np.abs(audio_data))
-
-        # Time axis in seconds
-        duration = len(audio_data) / sr
-        times = np.linspace(0, duration, len(audio_data))
-
-        # Create the figure
-        fig, ax = plt.subplots(figsize=(10, 3))
-        ax.plot(times, audio_data, color="steelblue", linewidth = 0.2)
-        ax.set_xlim(0, duration)
-        ax.set_ylim(-1.1, 1.1)
-        ax.set_xlabel("Time [s]")
-        ax.set_ylabel("Amplitude")
-        ax.grid(alpha=0.3)
-        plt.tight_layout()
-
-        # For Marimo / Jupyter, returning fig allows inline display
-        return fig
-    return np, plot_waveform, plt
-
-
-@app.cell
-def _(d_selected, plot_waveform, sr_selected):
-    fig = plot_waveform(d_selected, sr_selected)
+def _(d_final, plot_waveform, sr_resampled):
+    fig = plot_waveform(d_final, sr_resampled)
     fig
     return
 
 
 @app.cell
-def _(np, plt):
-    from scipy.signal import spectrogram
-
-    def plot_spectrogram(audio_data, sr):
-        if audio_data.ndim > 1:
-            audio_data = audio_data[:, 0]
-
-        # Compute spectrogram
-        frequencies, time_segments, Sxx = spectrogram( audio_data, fs=sr, nperseg=1024, noverlap=256, scaling="spectrum")
-
-        # Convert power to dB
-        Sxx_dB = 10 * np.log10(Sxx + 1e-10)
-
-        # Create figure and plot
-        fig, ax = plt.subplots(figsize=(10, 3))
-        pcm = ax.pcolormesh( time_segments, frequencies, Sxx_dB, shading="gouraud", cmap="viridis", vmin=-99)
-        fig.colorbar(pcm, ax=ax, label="Intensity [dB]")
-        ax.set_ylabel("Frequency [Hz]")
-        ax.set_xlabel("Time [s]")
-        ax.set_ylim(0, sr / 2)
-        plt.tight_layout()
-
-        return fig
-    return (plot_spectrogram,)
-
-
-@app.cell
-def _(d_selected, plot_spectrogram, sr_selected):
-    fig2 = plot_spectrogram(d_selected, sr_selected)
+def _(d_final, plot_spectrogram, sr_selected):
+    fig2 = plot_spectrogram(d_final, sr_selected)
     fig2
     return
 
@@ -414,7 +379,7 @@ def _(slider_amp, slider_loops, slider_pitch, slider_speed, slider_t):
 @app.cell
 def _(mo):
     # start time
-    slider_t = mo.ui.slider(0, 30.0, label='Time in Song (s)')
+    slider_t = mo.ui.slider(0, 20.0, label='Time in Song (s)')
     slider_t 
     return (slider_t,)
 
@@ -453,35 +418,33 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    # a button that when clicked will have its value set to True;
-    # any cells referencing that button will automatically run.
-    button_addclip = mo.ui.run_button(label='Add Clip')
-    button_addclip
-    return (button_addclip,)
+    # Add to mix
+    button_add_clip = mo.ui.run_button(label="Add Clip")
+    button_add_clip
+    return (button_add_clip,)
 
 
 @app.cell
 def _(
     audio_selected,
-    button_addclip,
+    button_add_clip,
     clips_to_add,
-    ipd,
-    loops,
-    loudness,
-    np,
-    process_one_clip_to_add,
-    ptch,
-    spd,
-    start_time,
-    wavfile,
+    slider_amp,
+    slider_loops,
+    slider_pitch,
+    slider_speed,
+    slider_t,
 ):
-    if button_addclip.value:
-        print('ADDING A CLIP!!!')
-        clips_to_add.loc[len(clips_to_add)] = [audio_selected, start_time, loops, loudness, ptch, spd]
-        temp_sr, temp_d = process_one_clip_to_add(audio_selected, start_time, loops, loudness, ptch, spd)
-        wavfile.write('temp_clip.wav', temp_sr, np.array(temp_d, dtype=np.float32))
-        ipd.Audio('temp_clip.wav')
-
+    if button_add_clip.value and audio_selected:
+        clips_to_add.loc[len(clips_to_add)] = [
+            audio_selected,
+            slider_t.value,
+            slider_loops.value,
+            slider_amp.value,
+            slider_pitch.value,
+            slider_speed.value
+        ]
+        print(f"Added clip to mix: {audio_selected}")
     return
 
 
@@ -492,7 +455,12 @@ def _(mo):
 
 
 @app.cell
-def _():
+def _(build_mix_array, button_play_mix, clips_to_add, ipd):
+    if button_play_mix.value and len(clips_to_add) > 0:
+        sr_mix, mix_data_array = build_mix_array(clips_to_add)
+        clips_to_add.drop(clips_to_add.index, inplace=True)
+        clips_to_add.reset_index(drop=True, inplace=True)
+        ipd.display(ipd.Audio(mix_data_array, rate=sr_mix))
     return
 
 
@@ -510,92 +478,63 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    button_mixerplay = mo.ui.run_button(label='Play')
-    button_mixerplay
-    return
-
-
-@app.cell
-def _(mo):
     # a button that when clicked will have its value set to True;
     # any cells referencing that button will automatically run.
     button_export = mo.ui.run_button(label='Export file')
     button_export
-    return
+    return (button_export,)
 
 
 @app.cell
-def _(boxes, plot_time_freq_boxes):
-    fig3 = plot_time_freq_boxes(boxes)
+def _(empty_audio, final_wav, plot_waveform, sr_resampled):
+    if "final_wav" in locals() and final_wav is not None:
+        fig3 = plot_waveform(final_wav, sr_resampled)
+    
+    else:
+        fig3 = plot_waveform(empty_audio, sr_resampled)
     fig3
     return
 
 
 @app.cell
-def _(plt):
-    import matplotlib.patches as patches
-
-    def plot_time_freq_boxes(boxes, 
-                             time_range=(0, 60), 
-                             freq_range=(0, 20000)):
-        """
-        Plot time-frequency boxes on a 2D plot with labels and colors.
-
-        Parameters
-        ----------
-        boxes : list of tuples
-            Each tuple = (t_start, t_end, f_start, f_end, label)
-        time_range : tuple
-            (min_time, max_time) for x-axis
-        freq_range : tuple
-            (min_freq, max_freq) for y-axis
-        """
-        fig, ax = plt.subplots(figsize=(10, 6))
-        ax.set_facecolor("black")  # black background
-
-        for (t_start, t_end, f_start, f_end, label) in boxes:
-            # Pick color based on label
-            if label.lower() == "seismic":
-                facecolor = "deeppink"
-                edgecolor = "hotpink"
-            elif label.lower() == "whale":
-                facecolor = "purple"
-                edgecolor = "violet"
-            else:
-                facecolor = "gray"
-                edgecolor = "lightgray"
-
-            # Draw box
-            rect = patches.Rectangle(
-                (t_start, f_start), 
-                t_end - t_start, 
-                f_end - f_start,
-                linewidth=1.5, edgecolor=edgecolor, facecolor=facecolor, alpha=0.8
-            )
-            ax.add_patch(rect)
-
-            # Add label text at the center of the box
-            # ax.text(
-            #     (t_start + t_end) / 2, 
-            #     (f_start + f_end) / 2, 
-            #     label, 
-            #     color="white", ha="center", va="center", fontsize=9, weight="bold"
-            # )
-
-        # Set limits and labels
-        ax.set_xlim(time_range)
-        ax.set_ylim(freq_range)
-        ax.set_xlabel("Time (s)", color="Purple")
-        ax.set_ylabel("Frequency (Hz)", color="Purple")
-        ax.set_title("MY SONG", color="Purple")
-
-        # White ticks
-        ax.tick_params(colors="white")
-
-        return fig
+def _(empty_audio, final_wav, plot_spectrogram, sr_resampled):
+    if "final_wav" in locals() and final_wav is not None:
+        fig4 = plot_spectrogram(final_wav, sr_resampled)
+    else:
+        fig4 = plot_spectrogram(empty_audio, sr_resampled)
+    fig4
+    return
 
 
-    return (plot_time_freq_boxes,)
+@app.cell
+def _(mo):
+    # Play full mix
+    button_play_mix = mo.ui.run_button(label="View Full Mix")
+    button_play_mix
+    return (button_play_mix,)
+
+
+@app.cell
+def _(button_export, clips_to_add, combine_clips, finalwav):
+    if button_export.value:
+        final_wavPath, final_wav = combine_clips(clips_to_add)
+        final_mp3 = finalwav.export_to_mp3(final_wavPath)
+        print("Exported mix to:", final_mp3)
+    return (final_wav,)
+
+
+@app.cell
+def _(basePath, mo):
+
+    mo.image(
+        src= basePath / "Images" / "bunda-feia-cute.gif",
+        alt="placeholder",
+        width=200,
+        height=200,
+        rounded=True,
+        caption=""
+    )
+    return
 
 
 @app.cell(column=5)
@@ -661,6 +600,11 @@ def _(mo):
 
 @app.cell
 def _():
+    return
+
+
+@app.cell
+def _():
     import pandas as pd
     import ffmpeg
 
@@ -680,8 +624,109 @@ def _():
 
 
 @app.cell
+def _(np, process_one_clip_to_add):
+    def build_mix_array(mix_clips, sr=44100, duration=30):
+        """
+        Combine all clips in mix_clips into a single audio array.
+        Each row should have: 'clip', 'start_time', 'loops', 'loudness', 'pitch', 'speed'
+        """
+        mix_array = np.zeros(duration * sr, dtype=np.float32)
+
+        for _, row in mix_clips.iterrows():
+            sr_clip, clip_data = process_one_clip_to_add(
+                row['clip'],
+                row['start_time'],
+                row['loops'],
+                row['loudness'],
+                row['pitch'],
+                row['speed'],
+                gen_sr=sr,
+                max_len=duration
+            )
+
+            # Ensure clip fits in the mix
+            if len(clip_data) > len(mix_array):
+                clip_data = clip_data[:len(mix_array)]
+            mix_array[:len(clip_data)] += clip_data
+
+        # Normalize
+        if np.max(np.abs(mix_array)) > 0:
+            mix_array = mix_array / np.max(np.abs(mix_array))
+
+        return sr, mix_array
+    return (build_mix_array,)
+
+
+@app.cell
+def _(np, plt):
+    from scipy.signal import spectrogram
+
+    def plot_spectrogram(audio_data, sr):
+        if audio_data.ndim > 1:
+            audio_data = audio_data[:, 0]
+
+        # Compute spectrogram
+        frequencies, time_segments, Sxx = spectrogram( audio_data, fs=sr, nperseg=1024, noverlap=256, scaling="spectrum")
+
+        # Convert power to dB
+        Sxx_dB = 10 * np.log10(Sxx + 1e-10)
+
+        # Create figure and plot
+        fig, ax = plt.subplots(figsize=(10, 3))
+        pcm = ax.pcolormesh( time_segments, frequencies, Sxx_dB, shading="gouraud", cmap="viridis", vmin=-99)
+        fig.colorbar(pcm, ax=ax, label="Intensity [dB]")
+        ax.set_ylabel("Frequency [Hz]")
+        ax.set_xlabel("Time [s]")
+        ax.set_ylim(0, sr / 2)
+        plt.tight_layout()
+
+        return fig
+    return (plot_spectrogram,)
+
+
+@app.cell
+def _():
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    def plot_waveform(audio_data, sr):
+        # Handle stereo: take first channel if needed
+        if audio_data.ndim > 1:
+            audio_data = audio_data[:, 0]
+
+        # Normalize amplitude to [-1, 1]
+        audio_data = audio_data.astype(np.float32)
+        audio_data /= np.max(np.abs(audio_data))
+
+        # Time axis in seconds
+        duration = len(audio_data) / sr
+        times = np.linspace(0, duration, len(audio_data))
+
+        # Create the figure
+        fig, ax = plt.subplots(figsize=(10, 3))
+        ax.plot(times, audio_data, color="steelblue", linewidth = 0.2)
+        ax.set_xlim(0, duration)
+        ax.set_ylim(-1.1, 1.1)
+        ax.set_xlabel("Time [s]")
+        ax.set_ylabel("Amplitude")
+        ax.grid(alpha=0.3)
+        plt.tight_layout()
+
+        # For Marimo / Jupyter, returning fig allows inline display
+        return fig
+    return np, plot_waveform, plt
+
+
+@app.cell
+def _(basePath, wavfile):
+    workingWavPath = basePath / "data" / "workingwav" / 'mysong.wav'
+    sr_base, d_base = wavfile.read(workingWavPath)
+    return
+
+
+@app.cell
 def _(librosa, np, signal, wavfile):
-    def process_one_clip_to_add(clip, start_time, loop_val, loud_val, ptch_val, spd_val, gen_sr=44100, max_len=60):
+    def process_one_clip_to_add(clip, start_time, loop_val, loud_val, ptch_val, spd_val, gen_sr=44100, max_len=30):
         max_len = gen_sr * max_len
         print("NEXT FILE____________________________")
         sr, d = wavfile.read(clip)
@@ -714,7 +759,7 @@ def _(librosa, np, signal, wavfile):
         d = d_loop_amp_p_s
 
         # Length and start time adjustment
-        start_chunk_len = start_time * sr
+        start_chunk_len = int(start_time * sr)   # <-- Convert to int
         strt_zero_chunk = np.zeros(start_chunk_len)
         padded_d = np.concatenate((strt_zero_chunk, d))
 
@@ -749,31 +794,47 @@ def _(librosa, np, signal, wavfile):
 
 
 @app.cell
-def _(np, plt, process_one_clip_to_add, wavfile):
-    # REMIX
-    def combine_clips(base_song, clips_to_add):
-        sr_base, d_base = wavfile.read(base_song)
-        plt.figure(figsize=(10, 4))
-        plt.plot(np.arange(0, len(d_base)) / sr_base, d_base, 'b')
-        srs, ds, combined_sounds = ([], [], d_base)
-        for index, row in clips_to_add.iterrows():
-            sr, d = process_one_clip_to_add(row['clip'], row['start_time'], row['loops'], row['loudness'], row['pitch_speed'])
-            srs.append(sr)
-            ds.append(d)
-            plt.plot(np.arange(0, len(d)) / sr, d - 1.5 * index, 'r')
-            combined_sounds += d
-        (plt.xlabel('Time (s)'), plt.ylabel('Amplitude'))
-        plt.title('My Song!')
-        plt.grid(True, alpha=0.3)
-        wavfile.write('my_final_song.wav', sr_base, np.array(combined_sounds, dtype=np.float32))
-        return
-    return
+def _(basePath, np, process_one_clip_to_add, wavfile):
+    def combine_clips(clips_to_add, output_wav="my_final_song.wav", sr=44100, duration=60):
+        """
+        Combine all clips from the clips_to_add DataFrame into one overlapping mix.
+        - Each row in clips_to_add contains: clip name, start_time, loops, loudness, pitch, speed
+        - Mix length is fixed by duration (seconds).
+        """
+        owp = basePath / output_wav
+        total_samples = sr * duration
+        final_mix = np.zeros(total_samples, dtype=np.float32)
 
+        for _, row in clips_to_add.iterrows():
+            sr_clip, d_clip = process_one_clip_to_add(
+                row['clip'],
+                row['start_time'],
+                row['loops'],
+                row['loudness'],
+                row['pitch'],
+                row['speed'],
+                gen_sr=sr,
+                max_len=duration
+            )
 
-@app.cell
-def _(clip_list):
-    avail_wavs = clip_list
-    return
+            # Align this clip in time
+            start_sample = int(float(row['start_time']) * sr)
+            end_sample = start_sample + len(d_clip)
+
+            if start_sample < total_samples:
+                # Clip if it runs off the end
+                end_sample = min(end_sample, total_samples)
+                clip_segment = d_clip[:end_sample - start_sample]
+                final_mix[start_sample:end_sample] += clip_segment.astype(np.float32)
+
+        # Normalize to prevent clipping
+        if np.max(np.abs(final_mix)) > 0:
+            final_mix /= np.max(np.abs(final_mix))
+
+        wavfile.write(owp, sr, final_mix)
+        return owp, final_mix
+
+    return (combine_clips,)
 
 
 @app.cell
@@ -787,7 +848,7 @@ def _(np, pd, wavfile):
     wavfile.write('my_song.wav', sample_rate, empty_audio)
     print("The original empty song file is length: ", len(empty_audio))
     print(clips_to_add)
-    return (clips_to_add,)
+    return clips_to_add, empty_audio
 
 
 @app.cell
@@ -797,20 +858,108 @@ def _(clip_dropdown, clips_path, os):
 
 
 @app.cell
-def _(clip_dropdown, clips_path, np, os, wavfile):
+def _(
+    clip_dropdown,
+    clips_path,
+    librosa,
+    loops,
+    loudness,
+    np,
+    os,
+    ptch,
+    signal,
+    spd,
+    wavfile,
+):
     ## SELECT YOUR CLIP:
     audio_selected = os.path.join(clips_path, clip_dropdown.selected_key)
     sr_selected, d_selected = wavfile.read(audio_selected)
     d_selected = d_selected / np.max(np.abs(d_selected))
-    return audio_selected, d_selected, sr_selected
+
+    # Modify sampling rate to match the file we are building on
+    if sr_selected != 44100:
+        ratio = 44100 /sr_selected
+        d_resampled = signal.resample(d_selected, int(len(d_selected) * ratio))        # Use Fourier method for better quality
+        sr_resampled = 44100
+    else:
+        d_resampled = d_selected       
+        sr_resampled = sr_selected
+
+    d_looped = np.tile(d_resampled, loops)
+    d_louded = d_looped * loudness
+    d_pitched = librosa.effects.pitch_shift(y=d_louded, sr=sr_resampled, n_steps=ptch)
+    d_final = librosa.effects.time_stretch(d_pitched, rate=spd)
+    return audio_selected, d_final, sr_resampled, sr_selected
 
 
 @app.cell
 def _(audio_selected, clips_to_add, loops, loudness, ptch, spd, start_time):
     clips_to_add.loc[len(clips_to_add)] = [audio_selected, start_time, loops, loudness, ptch, spd]
+    return
 
-    for index, clip in enumerate(clips_to_add['clip']):
-        print(clip.split("temp", 1)[-1])
+
+@app.cell
+def _(patches, plt):
+    def plot_time_freq_boxes(boxes, 
+                             time_range=(0, 60), 
+                             freq_range=(0, 20000)):
+        """
+        Plot time-frequency boxes on a 2D plot with labels and colors.
+
+        Parameters
+        ----------
+        boxes : list of tuples
+            Each tuple = (t_start, t_end, f_start, f_end, label)
+        time_range : tuple
+            (min_time, max_time) for x-axis
+        freq_range : tuple
+            (min_freq, max_freq) for y-axis
+        """
+        fig, ax = plt.subplots(figsize=(10, 6))
+        ax.set_facecolor("black")  # black background
+
+        for (t_start, t_end, f_start, f_end, label) in boxes:
+            # Pick color based on label
+            if label.lower() == "seismic":
+                facecolor = "deeppink"
+                edgecolor = "hotpink"
+            elif label.lower() == "whale":
+                facecolor = "purple"
+                edgecolor = "violet"
+            else:
+                facecolor = "gray"
+                edgecolor = "lightgray"
+
+            # Draw box
+            rect = patches.Rectangle(
+                (t_start, f_start), 
+                t_end - t_start, 
+                f_end - f_start,
+                linewidth=1.5, edgecolor=edgecolor, facecolor=facecolor, alpha=0.8
+            )
+            ax.add_patch(rect)
+
+            # Add label text at the center of the box
+            # ax.text(
+            #     (t_start + t_end) / 2, 
+            #     (f_start + f_end) / 2, 
+            #     label, 
+            #     color="white", ha="center", va="center", fontsize=9, weight="bold"
+            # )
+
+        # Set limits and labels
+        ax.set_xlim(time_range)
+        ax.set_ylim(freq_range)
+        ax.set_xlabel("Time (s)", color="Purple")
+        ax.set_ylabel("Frequency (Hz)", color="Purple")
+        ax.set_title("MY SONG", color="Purple")
+
+        # White ticks
+        ax.tick_params(colors="white")
+
+        return fig
+
+
     return
 
 
