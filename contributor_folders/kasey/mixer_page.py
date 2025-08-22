@@ -95,8 +95,8 @@ def _(basePath, mo):
     mo.image(
         src= basePath / "Images" / "welcome.png",
         alt="placeholder",
-        width=115,
-        height=115,
+        width=75,
+        height=75,
         rounded=False,
         caption=""
     )
@@ -159,8 +159,6 @@ def _(mo):
 
 @app.cell(column=1)
 def _(mo):
-    import webbrowser
-
     gather_button = mo.ui.button(
         value=0, on_click=lambda value: value + 1, label="Gather Data", kind='neutral'
     )
@@ -316,15 +314,14 @@ def _(clip_list, mo):
 
 
 @app.cell
-def _(clip_dropdown, clips_path, mo, os):
-    mo.audio(os.path.join(clips_path, clip_dropdown.selected_key))
-    return
+def _(clip_dropdown, clips_path, os):
+    selected_audio = os.path.join(clips_path, clip_dropdown.selected_key)
+    return (selected_audio,)
 
 
 @app.cell
-def _(mo):
-    button_libraryplay = mo.ui.run_button(label='Play')
-    button_libraryplay
+def _(ipd, selected_audio):
+    ipd.Audio(selected_audio)
     return
 
 
@@ -433,12 +430,12 @@ def _(mo):
 
 
 @app.cell
-def _(slider_amp, slider_pitch, slider_speed, slider_t):
+def _(slider_amp, slider_loops, slider_pitch, slider_speed, slider_t):
     start_time = slider_t.value
     ptch = slider_pitch.value
     spd = slider_speed.value
     # ptch_speed = slider_speed.value
-    loops = 1 # slider_f.value
+    loops = slider_loops.value # slider_f.value
     loudness = slider_amp.value
 
     return loops, loudness, ptch, spd, start_time
@@ -455,7 +452,7 @@ def _(mo):
 @app.cell
 def _(mo):
     # ptch_spd
-    slider_speed = mo.ui.slider(0, 2, label='Speed')
+    slider_speed = mo.ui.slider(0, 2, .1, label='Speed', value=1)
     slider_speed
     return (slider_speed,)
 
@@ -463,7 +460,7 @@ def _(mo):
 @app.cell
 def _(mo):
     # reporpoise
-    slider_pitch = mo.ui.slider(0, 2, label='Pitch')
+    slider_pitch = mo.ui.slider(0, 2, .1, label='Pitch', value=1)
     slider_pitch
     return (slider_pitch,)
 
@@ -471,9 +468,17 @@ def _(mo):
 @app.cell
 def _(mo):
     # loudness
-    slider_amp = mo.ui.slider(1, 10, label='Amplitude (dB)')
+    slider_amp = mo.ui.slider(0, 2, .1, label='Amplitude (dB)', value=1)
     slider_amp
     return (slider_amp,)
+
+
+@app.cell
+def _(mo):
+    # loops
+    slider_loops = mo.ui.slider(0, 15, 1, label='Loops', value=1)
+    slider_loops
+    return (slider_loops,)
 
 
 @app.cell
@@ -488,7 +493,7 @@ def _(mo):
 def _(mo):
     # a button that when clicked will have its value set to True;
     # any cells referencing that button will automatically run.
-    button_addclip = mo.ui.run_button(label='Add to Symphony')
+    button_addclip = mo.ui.run_button(label='Update')
     button_addclip
     return (button_addclip,)
 
@@ -498,15 +503,23 @@ def _(
     audio_selected,
     button_addclip,
     clips_to_add,
+    ipd,
     loops,
     loudness,
+    np,
+    process_one_clip_to_add,
     ptch,
     spd,
     start_time,
+    wavfile,
 ):
     if button_addclip.value:
         print('ADDING A CLIP!!!')
         clips_to_add.loc[len(clips_to_add)] = [audio_selected, start_time, loops, loudness, ptch, spd]
+        temp_sr, temp_d = process_one_clip_to_add(audio_selected, start_time, loops, loudness, ptch, spd)
+        wavfile.write('temp_clip.wav', temp_sr, np.array(temp_d, dtype=np.float32))
+        ipd.Audio('temp_clip.wav')
+
     return
 
 
@@ -729,6 +742,7 @@ def _():
     import glob
     import os
     import shutil
+    import librosa
 
     import IPython.display as ipd
     from scipy.io import wavfile
@@ -737,7 +751,7 @@ def _():
     from pydub import AudioSegment
     from scipy.signal import resample
     from pydub.effects import speedup
-    return os, pd, signal, wavfile
+    return ipd, librosa, os, pd, signal, wavfile
 
 
 @app.cell
