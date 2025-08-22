@@ -135,31 +135,12 @@ def _(mo):
 
 @app.cell(column=1)
 def _(mo):
-    import webbrowser
-    mix_button = mo.ui.button(
-            label="Mix Sounds",
-            kind='neutral',
-            on_click=lambda _: webbrowser.open("http://10.19.147.127:8000/", new=0)  # URL for Mixer page
-        )
-    mix_button
-    return (webbrowser,)
-
-
-@app.cell
-def _(mo, webbrowser):
-    educate_button = mo.ui.button( label="Learn More", kind='neutral', on_click=lambda _: webbrowser.open("http://10.19.147.127:8000/learn", new=0))  # URL for Learn More
-    educate_button
-    return
-
-
-@app.cell
-def _(mo, webbrowser):
-    about_button = mo.ui.button(
-            label="About the Team",
-            kind='neutral',
-            on_click=lambda _: webbrowser.open("http://10.19.147.127:8000/about", new=0)  # URL for About
-        )
-    about_button
+    nav_menu = mo.nav_menu({
+        "/": "Mix Sounds",  # internal
+        "/learn": "Learn More",  # internal
+        "/about": "About the Team",  # internal
+    })
+    nav_menu
     return
 
 
@@ -489,7 +470,7 @@ def _(mo):
 def _(empty_audio, final_wav, plot_waveform, sr_resampled):
     if "final_wav" in locals() and final_wav is not None:
         fig3 = plot_waveform(final_wav, sr_resampled)
-    
+
     else:
         fig3 = plot_waveform(empty_audio, sr_resampled)
     fig3
