@@ -360,13 +360,13 @@ def _(slider_amp, slider_loops, slider_pitch, slider_speed, slider_t):
     loops = slider_loops.value # slider_f.value
     loudness = slider_amp.value
 
-    return loops, loudness, ptch, spd, start_time
+    return loops, loudness, ptch, spd
 
 
 @app.cell
 def _(mo):
     # start time
-    slider_t = mo.ui.slider(0, 20.0, label='Time in Song (s)')
+    slider_t = mo.ui.slider(0, 59.0, label='Time in Song (s)')
     slider_t 
     return (slider_t,)
 
@@ -442,12 +442,42 @@ def _(mo):
 
 
 @app.cell
-def _(build_mix_array, button_play_mix, clips_to_add, ipd):
+def _(mo):
+    # Play full mix
+    button_play_mix = mo.ui.run_button(label="MIX! 🪩")
+    button_play_mix
+    return (button_play_mix,)
+
+
+@app.cell
+def _(build_mix_array, button_play_mix, clips_to_add):
     if button_play_mix.value and len(clips_to_add) > 0:
-        sr_mix, mix_data_array = build_mix_array(clips_to_add)
-        clips_to_add.drop(clips_to_add.index, inplace=True)
-        clips_to_add.reset_index(drop=True, inplace=True)
-        ipd.display(ipd.Audio(mix_data_array, rate=sr_mix))
+        mix_data_array, all_sr, all_d = build_mix_array(clips_to_add)
+    return all_d, all_sr, mix_data_array
+
+
+@app.cell
+def _(all_d, all_sr, plot_wavform_stacked):
+    fig_final = plot_wavform_stacked(all_sr, all_d)
+    fig_final
+    return
+
+
+@app.cell
+def _(button_export, ipd, mix_data_array):
+    if button_export.value and mix_data_array.any():
+        ipd.display(ipd.Audio(mix_data_array, rate=44100))
+    return
+
+
+@app.cell
+def _(mix_data_array):
+    mix_data_array
+    return
+
+
+@app.cell
+def _():
     return
 
 
@@ -467,7 +497,7 @@ def _(mo):
 def _(mo):
     # a button that when clicked will have its value set to True;
     # any cells referencing that button will automatically run.
-    button_export = mo.ui.run_button(label='Export file')
+    button_export = mo.ui.run_button(label='Listen to my new song')
     button_export
     return (button_export,)
 
@@ -563,14 +593,6 @@ def _(clips_to_add, np, plt, spectrogram, wavfile):
     fig4 = plot_combined_spectrogram(clips_to_add)
     fig4
     return
-
-
-@app.cell
-def _(mo):
-    # Play full mix
-    button_play_mix = mo.ui.run_button(label="Hear Full Mix")
-    button_play_mix
-    return (button_play_mix,)
 
 
 @app.cell
@@ -684,12 +706,13 @@ def _():
 
 @app.cell
 def _(np, process_one_clip_to_add):
-    def build_mix_array(mix_clips, sr=44100, duration=30):
+    def build_mix_array(mix_clips, sr=44100, duration=60):
         """
         Combine all clips in mix_clips into a single audio array.
         Each row should have: 'clip', 'start_time', 'loops', 'loudness', 'pitch', 'speed'
         """
         mix_array = np.zeros(duration * sr, dtype=np.float32)
+        srs, ds = [], []
 
         for _, row in mix_clips.iterrows():
             sr_clip, clip_data = process_one_clip_to_add(
@@ -702,6 +725,8 @@ def _(np, process_one_clip_to_add):
                 gen_sr=sr,
                 max_len=duration
             )
+            srs.append(sr_clip)
+            ds.append(clip_data)
 
             # Ensure clip fits in the mix
             if len(clip_data) > len(mix_array):
@@ -712,7 +737,7 @@ def _(np, process_one_clip_to_add):
         if np.max(np.abs(mix_array)) > 0:
             mix_array = mix_array / np.max(np.abs(mix_array))
 
-        return sr, mix_array
+        return mix_array, srs, ds
     return (build_mix_array,)
 
 
@@ -773,7 +798,21 @@ def _():
 
         # For Marimo / Jupyter, returning fig allows inline display
         return fig
-    return np, plot_waveform, plt
+
+
+    def plot_wavform_stacked(all_srs, all_ds):
+        fig = plt.figure(figsize=(10, 6))
+        for count in range(len(all_srs)):
+            s_curr, d_curr = all_srs[count], all_ds[count]
+            plt.plot(np.arange(0, len(d_curr)) / s_curr, (d_curr - (2*count)))
+
+        plt.xlabel("Time [s]")
+        plt.ylabel("Amplitude")
+        plt.grid(alpha=0.3)
+
+        # For Marimo / Jupyter, returning fig allows inline display
+        return fig
+    return np, plot_waveform, plot_wavform_stacked, plt
 
 
 @app.cell
@@ -897,22 +936,22 @@ def _(basePath, np, process_one_clip_to_add, wavfile):
 
 
 @app.cell
-def _(np, pd, wavfile):
+def _(np, pd):
     # clear audio
     sample_rate = 44100
-    duration = 10
+    duration = 60
     empty_audio = np.zeros(int(sample_rate * duration), dtype=np.float32)
     clips_to_add = pd.DataFrame(columns=['clip', 'start_time', 'loops', 'loudness', 'pitch', 'speed'])
 
-    wavfile.write('my_song.wav', sample_rate, empty_audio)
-    print("The original empty song file is length: ", len(empty_audio))
-    print(clips_to_add)
+    # wavfile.write('my_song.wav', sample_rate, empty_audio)
+    # print("The original empty song file is length: ", len(empty_audio))
+    # print(clips_to_add)
     return (clips_to_add,)
 
 
 @app.cell
-def _(clip_dropdown, clips_path, os):
-    os.path.join(clips_path, clip_dropdown.selected_key)
+def _():
+    # os.path.join(clips_path, clip_dropdown.selected_key)
     return
 
 
@@ -952,8 +991,8 @@ def _(
 
 
 @app.cell
-def _(audio_selected, clips_to_add, loops, loudness, ptch, spd, start_time):
-    clips_to_add.loc[len(clips_to_add)] = [audio_selected, start_time, loops, loudness, ptch, spd]
+def _():
+    # clips_to_add.loc[len(clips_to_add)] = [audio_selected, start_time, loops, loudness, ptch, spd]
     return
 
 
