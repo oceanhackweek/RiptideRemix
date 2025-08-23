@@ -224,9 +224,12 @@ def _(category_dropdown, mo):
 @app.cell
 def _(basePath, category_dropdown, class_dropdown, mo, os):
     if category_dropdown.selected_key == 'Cetacean Call':
-        sc_path = basePath / "Library" / "Cetacean" / class_dropdown.selected_key
-        sc_list = os.listdir(sc_path)
-        sc_dict = {sc_list[i]: i for i in range(len(sc_list))}
+        try:
+            sc_path = basePath / "Library" / "Cetacean" / class_dropdown.selected_key
+            sc_list = os.listdir(sc_path)
+            sc_dict = {sc_list[i]: i for i in range(len(sc_list))}
+        except TypeError:
+            sc_dict = {}
     elif category_dropdown.selected_key == 'Seismic Event':
         sc_dict = {"All": 1}
     else:
@@ -244,8 +247,12 @@ def _(sc_dropdown):
 @app.cell
 def _(basePath, category_dropdown, class_dropdown, os, sc_dropdown):
     if category_dropdown.selected_key == 'Cetacean Call':
-        clips_path = basePath / "Library" / "Cetacean" / class_dropdown.selected_key / sc_dropdown.selected_key
-        clip_list = os.listdir(clips_path)
+        try:
+            clips_path = basePath / "Library" / "Cetacean" / class_dropdown.selected_key / sc_dropdown.selected_key
+            clip_list = os.listdir(clips_path)
+        except TypeError:
+            clip_list = []
+            clips_path = None
     elif category_dropdown.selected_key == 'Seismic Event':
         clips_path = basePath / "Library" / "Seismic" / class_dropdown.selected_key
         clip_list = os.listdir(clips_path)
@@ -266,10 +273,10 @@ def _(clip_list, mo):
     return (clip_dropdown,)
 
 
-@app.cell
-def _(clip_dropdown, clips_path, os):
-    selected_audio = os.path.join(clips_path, clip_dropdown.selected_key)
-    return
+# @app.cell
+# def _(clip_dropdown, clips_path, os):
+#     selected_audio = os.path.join(clips_path, clip_dropdown.selected_key)
+#     return
 
 
 @app.cell
@@ -904,10 +911,10 @@ def _(np, pd, wavfile):
     return (clips_to_add,)
 
 
-@app.cell
-def _(clip_dropdown, clips_path, os):
-    os.path.join(clips_path, clip_dropdown.selected_key)
-    return
+# @app.cell
+# def _(clip_dropdown, clips_path, os):
+#     os.path.join(clips_path, clip_dropdown.selected_key)
+#     return
 
 
 @app.cell
@@ -923,11 +930,15 @@ def _(
     signal,
     spd,
     wavfile,
+    mo,
 ):
     ## SELECT YOUR CLIP:
-    audio_selected = os.path.join(clips_path, clip_dropdown.selected_key)
-    sr_selected, d_selected = wavfile.read(audio_selected)
-    d_selected = d_selected / np.max(np.abs(d_selected))
+    try:
+        audio_selected = os.path.join(clips_path, clip_dropdown.selected_key)
+        sr_selected, d_selected = wavfile.read(audio_selected)
+        d_selected = d_selected / np.max(np.abs(d_selected))
+    except TypeError:
+        mo.stop(True, mo.md("Please select a clip"))
 
     # Modify sampling rate to match the file we are building on
     if sr_selected != 44100:
