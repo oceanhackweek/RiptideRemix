@@ -6,6 +6,7 @@ server = (
     .with_app(path="/", root="./contributor_folders/kasey/mixer_page.py")
     .with_app(path="/about", root="./contributor_folders/kasey/about_team.py")
     .with_app(path="/learn", root="./contributor_folders/kasey/learn_more.py")
+    .with_app(path="/gather", root="./contributor_folders/kasey/visualize_quakes.py")
 )
 
 app = FastAPI()
