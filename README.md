@@ -20,21 +20,19 @@ You can start with a simple structure and as you progress you can refine it to c
 
 | Name                  | Role                |
 |-----------------------|---------------------|
-| Kasey Castello        | Participant         |
-| Mattie Toll           | Participant         |
-| Oluwatofunmi Adeboye  | Participant         |
-| Isabelle Brandicourt  | Participant         |
-| Derya Gumustel        | Fellow              |
+| Kasey Castello        | Web page designing         |
+| Mattie Toll           | Bioacoustic processing / Machine Learning         |
+| Oluwatofunmi Adeboye  | Seismic guru         |
+| Isabelle Brandicourt  | Acoustic processing / mixing / data sourcing         |
+| Derya Gumustel        | Web page designing              |
 | Dwight Owens          | Mentor              |
 
 ## Planning
 
-* Initial idea: "short description"
-* Ideation jam board: Add link
-* Ideation Presentation: Add link
-* Slack channel: ohw25_proj_name
-* Project google drive: Add link
-* Final presentation: Add link
+* Initial idea: "Acoustic mixer like GarageBand but pulling from oceanographic databases and processing data locally to pull out key sound bites."
+* Slack channel: ohw25_proj_riptideremix
+* Project google drive: [Add link](https://drive.google.com/drive/u/0/folders/1ZIcpZ1LWX_HtODz82-y-NJ0_Y0PhGG8u)
+* Final presentation: [Add link](https://docs.google.com/presentation/d/1SlbmSwNPd_eR4nL1RnYAX1_k1MJDHnvv7haCEPxDIH8/edit?slide=id.p#slide=id.p)
 
 ## Background
 This project was driven from simple question: What if we could turn the rhythms of the Earth into music? Maybe having a toolbox like a GarageBand, combining acoustic data science, seismic waves, and adding a touch of creativity, we’ve built a framework for an interactive dashboard that invites users to explore, list and remixes the sounds of the ocean. Using real geophysical and marine datasets, anyone can create new compositions by dragging, adjusting, and layering natural sounds into immersive sonic experiences. The idea is both playful and educational: bridging the gap between raw scientific data and artistic expression, while providing users with meaningful insights into the Earth’s dynamic systems. This will also a great toolbox for science education especially for highschool.
